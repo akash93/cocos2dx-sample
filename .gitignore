@@ -1,1 +1,10 @@
 .DS_Store
+bin/
+cocos2d/cocos/platform/android/libcocos2dx/build/
+proj.android-studio/app/assets/
+proj.android-studio/app/build.xml
+proj.android-studio/app/libs/
+proj.android-studio/app/local.properties
+proj.android-studio/app/obj/
+proj.android-studio/app/proguard-project.txt
+
