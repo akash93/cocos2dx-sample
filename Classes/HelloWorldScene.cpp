@@ -28,41 +28,41 @@ bool HelloWorld::init()
         return false;
     }
     
-    auto bgSprite = Sprite::create("MarioBg.png");
-    bgSprite->setAnchorPoint(Vec2(0,0));
-    bgSprite->setPosition(0,0);
+    auto bg_sprite = Sprite::create("MarioBg.png");
+    bg_sprite->setAnchorPoint(Vec2(0,0));
+    bg_sprite->setPosition(0,0);
     
-    auto bgWidth = bgSprite->getBoundingBox().size.width;
-    auto bgHeight = bgSprite->getBoundingBox().size.height;
+    auto bgWidth = bg_sprite->getBoundingBox().size.width;
+    auto bgHeight = bg_sprite->getBoundingBox().size.height;
     
-    auto displayWidth = Director::getInstance()->getVisibleSize().width;
-    auto displayHeight = Director::getInstance()->getVisibleSize().height;
+    auto display_width = Director::getInstance()->getVisibleSize().width;
+    auto display_height = Director::getInstance()->getVisibleSize().height;
     
-    auto bgScaleX = displayWidth/bgWidth;
-    auto bgScaleY = displayHeight/bgHeight;
-    bgSprite->setScale(bgScaleX, bgScaleY);
+    auto bg_scale_x = display_width/bgWidth;
+    auto bg_scale_y = display_height/bgHeight;
+    bg_sprite->setScale(bg_scale_x, bg_scale_y);
     
-    touchLabel = Label::createWithSystemFont("Touch anywhere to begin", "Roboto Mono Nerd Font", 30);
+    touch_label = Label::createWithSystemFont("Touch anywhere to begin", "Roboto Mono Nerd Font", 30);
     
-    touchLabel->setPosition(Vec2(displayWidth/2,
-                                 displayHeight/2));
-    touchLabel->setColor(ccBLACK);
-    auto touchListener = EventListenerTouchOneByOne::create();
+    touch_label->setPosition(Vec2(display_width/2,
+                                 display_height/2));
+    touch_label->setColor(ccBLACK);
+    auto touch_listener = EventListenerTouchOneByOne::create();
     
-    touchListener->onTouchBegan = CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
-    touchListener->onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
-    touchListener->onTouchMoved = CC_CALLBACK_2(HelloWorld::onTouchMoved, this);
-    touchListener->onTouchCancelled = CC_CALLBACK_2(HelloWorld::onTouchCancelled, this);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
-    this->addChild(bgSprite,0);
-    this->addChild(touchLabel);
+    touch_listener->onTouchBegan = CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
+    touch_listener->onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
+    touch_listener->onTouchMoved = CC_CALLBACK_2(HelloWorld::onTouchMoved, this);
+    touch_listener->onTouchCancelled = CC_CALLBACK_2(HelloWorld::onTouchCancelled, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(touch_listener, this);
+    this->addChild(bg_sprite,0);
+    this->addChild(touch_label);
     
     return true;
 }
 
 bool HelloWorld::onTouchBegan(Touch* touch, Event* event){
-    auto gameScene = Game::createScene();
-    Director::getInstance()->pushScene(gameScene);
+    auto game_scene = Game::createScene();
+    Director::getInstance()->pushScene(game_scene);
     return true;
 }
 

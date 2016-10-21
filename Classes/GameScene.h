@@ -17,6 +17,6 @@ public:
     CREATE_FUNC(Game);
     
 private:
-    Label* touchLabel;
+    Label* touch_label;
     
 };

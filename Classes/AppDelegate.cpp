@@ -33,6 +33,6 @@ void AppDelegate::applicationWillEnterForeground() {
 }
 
 void AppDelegate::initGLContextAttrs(){
-    GLContextAttrs glContextAttrs = {8,8,8,8,24,8};
-    GLView::setGLContextAttrs(glContextAttrs);
+    GLContextAttrs gl_context_attrs = {8,8,8,8,24,8};
+    GLView::setGLContextAttrs(gl_context_attrs);
 }

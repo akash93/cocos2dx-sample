@@ -17,6 +17,6 @@ public:
     CREATE_FUNC(HelloWorld);
     
 private:
-    Label* touchLabel;
+    Label* touch_label;
     
 };
