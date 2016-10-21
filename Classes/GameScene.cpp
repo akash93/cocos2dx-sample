@@ -1,15 +1,14 @@
-#include "HelloWorldScene.h"
 #include "GameScene.h"
 
 USING_NS_CC;
 
-Scene* HelloWorld::createScene()
+Scene* Game::createScene()
 {
     // 'scene' is an autorelease object
     auto scene = Scene::create();
     
     // 'layer' is an autorelease object
-    auto layer = HelloWorld::create();
+    auto layer = Game::create();
 
     // add layer as a child to scene
     scene->addChild(layer);
@@ -19,7 +18,7 @@ Scene* HelloWorld::createScene()
 }
 
 // on "init" you need to initialize your instance
-bool HelloWorld::init()
+bool Game::init()
 {
     //////////////////////////////
     // 1. super init first
@@ -42,17 +41,17 @@ bool HelloWorld::init()
     auto bgScaleY = displayHeight/bgHeight;
     bgSprite->setScale(bgScaleX, bgScaleY);
     
-    touchLabel = Label::createWithSystemFont("Touch anywhere to begin", "Roboto Mono Nerd Font", 30);
+    touchLabel = Label::createWithSystemFont("New scene opened!!!", "Roboto Mono Nerd Font", 30);
     
     touchLabel->setPosition(Vec2(displayWidth/2,
                                  displayHeight/2));
     touchLabel->setColor(ccBLACK);
     auto touchListener = EventListenerTouchOneByOne::create();
     
-    touchListener->onTouchBegan = CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
-    touchListener->onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
-    touchListener->onTouchMoved = CC_CALLBACK_2(HelloWorld::onTouchMoved, this);
-    touchListener->onTouchCancelled = CC_CALLBACK_2(HelloWorld::onTouchCancelled, this);
+    touchListener->onTouchBegan = CC_CALLBACK_2(Game::onTouchBegan, this);
+    touchListener->onTouchEnded = CC_CALLBACK_2(Game::onTouchEnded, this);
+    touchListener->onTouchMoved = CC_CALLBACK_2(Game::onTouchMoved, this);
+    touchListener->onTouchCancelled = CC_CALLBACK_2(Game::onTouchCancelled, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
     this->addChild(bgSprite,0);
     this->addChild(touchLabel);
@@ -60,20 +59,20 @@ bool HelloWorld::init()
     return true;
 }
 
-bool HelloWorld::onTouchBegan(Touch* touch, Event* event){
-    auto gameScene = Game::createScene();
-    Director::getInstance()->pushScene(gameScene);
+bool Game::onTouchBegan(Touch* touch, Event* event){
+    touchLabel->setPosition(touch->getLocation());
+    touchLabel->setString("Yes it works!!");
     return true;
 }
 
-void HelloWorld::onTouchEnded(Touch* touch, Event* event){
+void Game::onTouchEnded(Touch* touch, Event* event){
     log("Touch ended");
 }
 
-void HelloWorld::onTouchMoved(Touch* touch, Event *event){
+void Game::onTouchMoved(Touch* touch, Event *event){
     log("Touch moved");
 }
 
-void HelloWorld::onTouchCancelled(Touch* touch, Event* event){
+void Game::onTouchCancelled(Touch* touch, Event* event){
     log("Touch cancelled");
 }
