@@ -1,21 +1,17 @@
 #pragma once
 #include "cocos2d.h"
-#include "GameSprite.h"
 
 USING_NS_CC;
 
-enum class PlayerClass{
-	RED,
-	GREEN,
-	BLUE,
-	YELLOW
-};
-
-class PlayerSprite: public GameSprite{
+class PlayerSprite : public Sprite{
 	public:
+		CC_SYNTHESIZE(Vec2, _next_position, NextPosition);
+		CC_SYNTHESIZE(Vec2, _vector, Vector);
+		CC_SYNTHESIZE(Touch*, _touch, Touch);
 		PlayerSprite();
 		virtual ~PlayerSprite();
-		PlayerClass pClass;
-		int score;
-
+		static PlayerSprite* gameSpriteWithFile(const char* file_name);
+		virtual void setPosition(const Vec2& position) override;
+		float radius();
+		
 };

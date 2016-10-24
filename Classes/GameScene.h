@@ -1,22 +1,36 @@
 #pragma once
 
 #include "cocos2d.h"
+#include "PlayerSprite.h"
+#include "BallSprite.h"
+
 USING_NS_CC;
 
 class Game : public Layer{
     
 public:
+    Game();
+    virtual ~Game();
     static Scene* createScene();
-    virtual bool init();
+    virtual bool init() override;
+    PlayerSprite* _player1;
+    PlayerSprite* _player2;
+
+
+    Label* _player1_name_label;
+    Label* _player2_name_label;
     
-    virtual bool onTouchBegan(Touch*,Event*);
-    virtual void onTouchEnded(Touch*,Event*);
-    virtual void onTouchMoved(Touch*,Event*);
-    virtual void onTouchCancelled(Touch*,Event*);
-    
+    Label* _player_score_label;
+    Size _screen_size;
+
+    int _player_score;
+    void updateScore();
     CREATE_FUNC(Game);
+
+    virtual bool onTouchBegan(Touch* touch, Event* events) override;
+    virtual void onTouchMoved(Touch* touch, Event* events) override;
+    virtual void onTouchEnded(Touch* touch, Event* events) override;
     
-private:
-    Label* touch_label;
+    void update(float dt) override;
     
 };
