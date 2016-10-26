@@ -15,7 +15,7 @@ public:
     virtual bool init() override;
     PlayerSprite* _player1;
     PlayerSprite* _player2;
-
+    std::vector<std::vector<BallSprite*>> ball_sprites;
 
     Label* _player1_name_label;
     Label* _player2_name_label;
