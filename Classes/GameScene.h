@@ -2,7 +2,8 @@
 
 #include "cocos2d.h"
 #include "PlayerSprite.h"
-#include "BallSprite.h"
+#include "BallGrid.h"
+
 
 USING_NS_CC;
 
@@ -15,7 +16,7 @@ public:
     virtual bool init() override;
     PlayerSprite* _player1;
     PlayerSprite* _player2;
-    std::vector<std::vector<BallSprite*>> ball_sprites;
+    BallGrid* ball_grid;
 
     Label* _player1_name_label;
     Label* _player2_name_label;

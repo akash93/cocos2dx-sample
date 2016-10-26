@@ -1,5 +1,9 @@
 #include "GameScene.h"
+#include "BallGrid.h"
 USING_NS_CC;
+
+#define NUM_ROWS  5
+#define NUM_COLS  4
 
 Game::Game(void){
 
@@ -48,22 +52,20 @@ bool Game::init(){
     int distance_measure = 15;
 
     std::vector<std::string> _sprite_names = {"blue_ball.png","yellow_ball.png","purple_ball.png","orange_ball.png"};
-    std::srand(std::time(NULL));
-    for(int i = 0; i < 4; i++){
-        std::vector<BallSprite*> rows;
-        for(int j = 0; j < 5; j++){
-            int random = std::rand() % 4;
-            BallSprite* ball_sprite = BallSprite::gameSpriteWithFile(_sprite_names.at(random).c_str());
-            ball_sprite->setPosition(Vec2(start_x + j*ball_sprite->radius()*distance_measure,start_y + i*ball_sprite->radius()*distance_measure));
-            ball_sprite->setScale(8);
-            ball_sprite->color = static_cast<Color>(random);
-            rows.push_back(ball_sprite);
-            this->addChild(ball_sprite,1);
+    ball_grid = new BallGrid();
+    ball_grid->generateGrid(NUM_COLS, NUM_ROWS, _sprite_names);
+    for(int i = 0; i < NUM_ROWS; i++){
+        for (int j = 0; j < NUM_COLS; j++) {
+            auto x_cord = start_x + j*ball_grid->ball_sprites[i][j]->radius() * distance_measure;
+            auto y_cord = start_y + i*ball_grid->ball_sprites[i][j]->radius() * distance_measure;
+            ball_grid->ball_sprites[i][j]->setPosition(Vec2(x_cord,y_cord));
+            ball_grid->ball_sprites[i][j]->setScale(8);
+            this->addChild(ball_grid->ball_sprites[i][j],1);
         }
-        ball_sprites.push_back(rows);
-    } 
+    }
 
     auto listener = EventListenerTouchOneByOne::create();
+
     listener->onTouchBegan = CC_CALLBACK_2(Game::onTouchBegan,this);
     listener->onTouchEnded = CC_CALLBACK_2(Game::onTouchEnded,this);
     listener->onTouchMoved = CC_CALLBACK_2(Game::onTouchMoved,this);
@@ -82,15 +84,36 @@ bool Game::init(){
 bool Game::onTouchBegan(Touch* touch, Event* event){
     if(touch!= nullptr){
         auto tap = touch->getLocation();
-        for(auto rows : ball_sprites){
-            for(auto ball_sprite: rows){
-                if(ball_sprite->getBoundingBox().containsPoint(tap)){
-                    auto tint_action = TintTo::create(2.0f, 120.0f, 232.0f, 254.0f);
-                    ball_sprite->runAction(tint_action);
-                    return true;
-                }
+        int chosen_idx  = -1;
+        for(int i = 0; i < NUM_COLS; i++){
+            if(ball_grid -> ball_sprites[0][i]->getBoundingBox().containsPoint(tap)){
+               chosen_idx = ball_grid -> ball_sprites[0][i]->id; 
+               break;
             }
         }
+        
+        if(chosen_idx != -1){
+            ball_grid->setPath(chosen_idx);
+            
+            for (int i = 0; i < NUM_ROWS; i++){
+                for (int j = 0; j < NUM_COLS; j++){
+                    auto chosen_action = TintTo::create(0.5f, 0.0f, 0.0f, 0.0f);
+                    auto burst_action = ScaleTo::create(0.5f, 2.0f);
+                    if(std::find(ball_grid->chosen_path.begin(),ball_grid->chosen_path.end(),ball_grid->ball_sprites[i][j]->id) != ball_grid->chosen_path.end()){
+                        ball_grid->ball_sprites[i][j]->runAction(chosen_action);
+                        continue;
+                    }
+                    if(std::find(ball_grid->burst_balls.begin(),ball_grid->burst_balls.end(),ball_grid->ball_sprites[i][j]->id) != ball_grid->burst_balls.end()){
+                        ball_grid->ball_sprites[i][j]->runAction(burst_action);
+                        continue;
+                    }
+                }
+            }
+            return true;
+        }
+
+        return false;
+
     }
     return false;
 }
