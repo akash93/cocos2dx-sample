@@ -1,9 +1,15 @@
 #include "GameScene.h"
-
 USING_NS_CC;
 
-Scene* Game::createScene()
-{
+Game::Game(void){
+
+}
+
+Game::~Game(void){
+
+}
+
+Scene* Game::createScene(){
     // 'scene' is an autorelease object
     auto scene = Scene::create();
     
@@ -18,61 +24,91 @@ Scene* Game::createScene()
 }
 
 // on "init" you need to initialize your instance
-bool Game::init()
-{
+bool Game::init(){
     //////////////////////////////
     // 1. super init first
     if ( !Layer::init() )
     {
         return false;
     }
+
+    _player_score = 0;
+    _screen_size = Director::getInstance()->getVisibleSize();
+    /* _player1 = PlayerSprite::gameSpriteWithFile("goku_ssgss.png"); */
+    /* _player2 = PlayerSprite::gameSpriteWithFile("goku_ssgss.png"); */
+    /* _player1->setPosition(Vec2(_screen_size.width*0.5,_screen_size.height*0.2 - _player1->radius()*2)); */
+    /* _player2->setPosition(Vec2(_screen_size.width*0.5,_screen_size.height*0.7)); */
+    /* _player1->setScale(0.2,0.2); */
+    /* _player2->setScale(0.2,0.2); */
+    /*  this->addChild(_player1,1); */
+    /*  this->addChild(_player2,1); */ 
     
-    auto bg_sprite = Sprite::create("MarioBg.png");
-    bg_sprite->setAnchorPoint(Vec2(0,0));
-    bg_sprite->setPosition(0,0);
-    
-    auto bg_width = bg_sprite->getBoundingBox().size.width;
-    auto bg_height = bg_sprite->getBoundingBox().size.height;
-    
-    auto display_width = Director::getInstance()->getVisibleSize().width;
-    auto display_height = Director::getInstance()->getVisibleSize().height;
-    
-    auto bg_scale_x = display_width/bg_width;
-    auto bg_scale_y = display_height/bg_height;
-    bg_sprite->setScale(bg_scale_x, bg_scale_y);
-    
-    touch_label = Label::createWithSystemFont("New scene opened!!!", "Roboto Mono Nerd Font", 30);
-    
-    touch_label->setPosition(Vec2(display_width/2,
-                                 display_height/2));
-    touch_label->setColor(ccBLACK);
-    auto touch_listener = EventListenerTouchOneByOne::create();
-    
-    touch_listener->onTouchBegan = CC_CALLBACK_2(Game::onTouchBegan, this);
-    touch_listener->onTouchEnded = CC_CALLBACK_2(Game::onTouchEnded, this);
-    touch_listener->onTouchMoved = CC_CALLBACK_2(Game::onTouchMoved, this);
-    touch_listener->onTouchCancelled = CC_CALLBACK_2(Game::onTouchCancelled, this);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(touch_listener, this);
-    this->addChild(bg_sprite,0);
-    this->addChild(touch_label);
-    
+    auto start_x = _screen_size.width*0.2;
+    auto start_y = _screen_size.height*0.5;
+    int distance_measure = 15;
+
+    std::vector<std::string> _sprite_names = {"blue_ball.png","yellow_ball.png","purple_ball.png","orange_ball.png"};
+    std::srand(std::time(NULL));
+    for(int i = 0; i < 4; i++){
+        std::vector<BallSprite*> rows;
+        for(int j = 0; j < 5; j++){
+            int random = std::rand() % 4;
+            BallSprite* ball_sprite = BallSprite::gameSpriteWithFile(_sprite_names.at(random).c_str());
+            ball_sprite->setPosition(Vec2(start_x + j*ball_sprite->radius()*distance_measure,start_y + i*ball_sprite->radius()*distance_measure));
+            ball_sprite->setScale(8);
+            ball_sprite->color = static_cast<Color>(random);
+            rows.push_back(ball_sprite);
+            this->addChild(ball_sprite,1);
+        }
+        ball_sprites.push_back(rows);
+    } 
+
+    auto listener = EventListenerTouchOneByOne::create();
+    listener->onTouchBegan = CC_CALLBACK_2(Game::onTouchBegan,this);
+    listener->onTouchEnded = CC_CALLBACK_2(Game::onTouchEnded,this);
+    listener->onTouchMoved = CC_CALLBACK_2(Game::onTouchMoved,this);
+
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener,this);
+
+    _player_score_label = Label::createWithSystemFont("Score: 0","Arial",80);
+    _player_score_label->setPosition(Vec2(_screen_size.width* 0.2, _screen_size.height*0.2));
+    _player_score_label->setTextColor(Color4B::WHITE);
+    this->addChild(_player_score_label,1);
+    this->scheduleUpdate();
+      
     return true;
 }
 
 bool Game::onTouchBegan(Touch* touch, Event* event){
-    touch_label->setPosition(touch->getLocation());
-    touch_label->setString("Yes it works!!");
-    return true;
+    if(touch!= nullptr){
+        auto tap = touch->getLocation();
+        for(auto rows : ball_sprites){
+            for(auto ball_sprite: rows){
+                if(ball_sprite->getBoundingBox().containsPoint(tap)){
+                    auto tint_action = TintTo::create(2.0f, 120.0f, 232.0f, 254.0f);
+                    ball_sprite->runAction(tint_action);
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
-void Game::onTouchEnded(Touch* touch, Event* event){
-    log("Touch ended");
+void Game::onTouchMoved(Touch* touch, Event* event){
+
 }
 
-void Game::onTouchMoved(Touch* touch, Event *event){
-    log("Touch moved");
+void Game::onTouchEnded(Touch* touch,Event* event){
+
 }
 
-void Game::onTouchCancelled(Touch* touch, Event* event){
-    log("Touch cancelled");
+void Game::updateScore(){
+
 }
+
+void Game::update(float dt){
+
+}
+
+
