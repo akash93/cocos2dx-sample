@@ -12,6 +12,7 @@ class BallGrid{
 		int _num_rows;
 		std::vector<int> chosen_path;
 		std::vector<int> burst_balls;
+		std::vector<cocos2d::Vec2> chosen_positions;
 		void setPath(int chosen_idx);
 		int getScore(Color player_class, Color enemy_class, int base_attack, int base_burst_damage);
 		void generateNewGrid(std::vector<int> ball_path);
