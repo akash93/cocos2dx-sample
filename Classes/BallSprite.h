@@ -21,4 +21,5 @@ class BallSprite : public Sprite{
 		float radius();
 		Color color;
 		int id;
+		static const std::vector<std::string> sprite_paths;
 };

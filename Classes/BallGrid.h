@@ -7,13 +7,12 @@ class BallGrid{
 		BallGrid();
 		virtual ~BallGrid();
 		std::vector<std::vector<BallSprite*>> ball_sprites;
-		void generateGrid(int num_cols, int num_rows, std::vector<std::string> sprite_names);
+		void generateGrid(int num_cols, int num_rows);
 		int _num_cols;
 		int _num_rows;
 		std::vector<int> chosen_path;
 		std::vector<int> burst_balls;
-		std::vector<cocos2d::Vec2> chosen_positions;
 		void setPath(int chosen_idx);
 		int getScore(Color player_class, Color enemy_class, int base_attack, int base_burst_damage);
-		void generateNewGrid(std::vector<int> ball_path);
+		std::vector<BallSprite*> generateNewGrid();
 };

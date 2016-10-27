@@ -4,18 +4,17 @@ BallGrid::BallGrid(void){}
 
 BallGrid::~BallGrid(void){}
 
-
 //Generate a grid based on the sprite paths provided
-void BallGrid::generateGrid(int num_cols, int num_rows, std::vector<std::string> sprite_names){
+void BallGrid::generateGrid(int num_cols, int num_rows){
 	_num_cols = num_cols;
 	_num_rows = num_rows;
 	std::srand(std::time(0));
 	int ball_idx = 1;
-	for (int i = 0; i< num_rows; i++) {
+	for (int i = 0; i < num_rows; i++) {
 		std::vector<BallSprite*> rows;
-		for (int j = 0; j< num_cols; j++) {
-			int rand_sprite_idx = std::rand() % sprite_names.size();
-			BallSprite* ball_sprite = BallSprite::gameSpriteWithFile(sprite_names.at(rand_sprite_idx).c_str());
+		for (int j = 0; j < num_cols; j++) {
+			int rand_sprite_idx = std::rand() % BallSprite::sprite_paths.size();
+			BallSprite* ball_sprite = BallSprite::gameSpriteWithFile(BallSprite::sprite_paths.at(rand_sprite_idx).c_str());
 			ball_sprite->color = static_cast<Color>(rand_sprite_idx);
 			ball_sprite->id = ball_idx;
 			rows.push_back(ball_sprite);
@@ -33,34 +32,32 @@ void BallGrid::setPath(int chosen_idx){
 	if(chosen_idx > _num_cols){
 		return; //Invalid selection. Nothing to do
 	}
-	Color chosen_color = ball_sprites[0][chosen_idx-1]->color;
+	Color chosen_color = ball_sprites[0][chosen_idx - 1] -> color;
 	int i = 0;
-	while(i < _num_rows && ball_sprites[i][chosen_idx-1]->color == chosen_color){
-		chosen_path.push_back(ball_sprites[i][chosen_idx-1]->id);
+	while(i < _num_rows && ball_sprites[i][chosen_idx - 1] -> color == chosen_color){
+		chosen_path.push_back(ball_sprites[i][chosen_idx - 1] -> id);
 		i++;
 	}
 	
 	for (int j = 0; j < chosen_path.size(); j++){
 		if(chosen_idx == 1){
-			if(ball_sprites[j][chosen_idx]->color == chosen_color){
-				burst_balls.push_back(ball_sprites[j][chosen_idx]->id);
+			if(ball_sprites[j][chosen_idx] -> color == chosen_color){
+				burst_balls.push_back(ball_sprites[j][chosen_idx] -> id);
 			}
-			continue;
 		}
 
 		else if(chosen_idx == _num_cols){
 			if(ball_sprites[j][chosen_idx - 2] -> color == chosen_color){
-				burst_balls.push_back(ball_sprites[j][chosen_idx - 2]->id);
+				burst_balls.push_back(ball_sprites[j][chosen_idx - 2] -> id);
 			}
-			continue;
 		}
 		else{
 			if(ball_sprites[j][chosen_idx - 2] -> color == chosen_color){
-				burst_balls.push_back(ball_sprites[j][chosen_idx - 2]->id);
+				burst_balls.push_back(ball_sprites[j][chosen_idx - 2] -> id);
 			}
 
 			if(ball_sprites[j][chosen_idx] -> color == chosen_color){
-				burst_balls.push_back(ball_sprites[j][chosen_idx]->id);
+				burst_balls.push_back(ball_sprites[j][chosen_idx] -> id);
 			}
 		}
 
@@ -73,7 +70,7 @@ void BallGrid::setPath(int chosen_idx){
 
 int BallGrid::getScore(Color player_class, Color enemy_class, int base_attack, int base_burst_damage){
 	int damage_multiplier = 1;
-	Color chosen_color = ball_sprites[0][chosen_path[0] - 1]->color;
+	Color chosen_color = ball_sprites[0][chosen_path[0] - 1] -> color;
 	if (chosen_color == player_class){
 		damage_multiplier *= 2;
 	}
@@ -87,3 +84,43 @@ int BallGrid::getScore(Color player_class, Color enemy_class, int base_attack, i
 	return score;
 }
 
+std::vector<BallSprite*> BallGrid::generateNewGrid(){
+	/*
+	 * Swap chosen path
+	*/
+	std::vector<BallSprite*> balls_to_be_added;
+
+	int num_swaps = chosen_path.size();
+	int chosen_col_idx = (chosen_path[0] - 1) % _num_cols;
+	for(int swap_from_row_idx = num_swaps; swap_from_row_idx < _num_rows; swap_from_row_idx++){
+		int swap_to_row_idx = swap_from_row_idx - chosen_path.size();
+		BallSprite* swap_from = ball_sprites[swap_from_row_idx][chosen_col_idx];
+		BallSprite* swap_to = ball_sprites[swap_to_row_idx][chosen_col_idx];
+		auto move_to = cocos2d::MoveTo::create(0.5f, swap_to->getPosition());
+		swap_from->runAction(move_to);
+		swap_from->id = swap_to->id;
+		ball_sprites[swap_to_row_idx][chosen_col_idx] = swap_from;
+		num_swaps--;
+	}
+
+	if (num_swaps > 0){
+		// Replace the remaining ones
+		int last_row_idx = chosen_path.size() - num_swaps;
+		for(int replace_row_idx = last_row_idx ; replace_row_idx < _num_rows; replace_row_idx++){
+			int rand_color = std::rand() % BallSprite::sprite_paths.size();
+			BallSprite* new_ball = BallSprite::gameSpriteWithFile(BallSprite::sprite_paths.at(rand_color).c_str());
+			new_ball->color = static_cast<Color>(rand_color);
+			new_ball->id = 1 + chosen_col_idx + (replace_row_idx * _num_cols);
+			BallSprite* old_ball = ball_sprites[replace_row_idx][chosen_col_idx];
+			new_ball->setPosition(old_ball->getPosition());
+			new_ball->setScale(8);
+			ball_sprites[replace_row_idx][chosen_col_idx] = new_ball;
+			balls_to_be_added.push_back(new_ball);
+		}
+	}
+
+	//TODO add logic for burst ball swaps
+	
+
+	return balls_to_be_added;
+}
