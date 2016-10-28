@@ -63,7 +63,6 @@ void BallGrid::setPath(int chosen_idx){
 
 	}
 
-	//TODO add animations for chosen and burst balls
 
 }
 
@@ -90,35 +89,30 @@ std::vector<BallSprite*> BallGrid::generateNewGrid(){
 	*/
 	std::vector<BallSprite*> balls_to_be_added;
 
-	int num_swaps = chosen_path.size();
+    int num_balls_to_be_added = chosen_path.size();
 	int chosen_col_idx = (chosen_path[0] - 1) % _num_cols;
-	for(int swap_from_row_idx = num_swaps; swap_from_row_idx < _num_rows; swap_from_row_idx++){
+	for(int swap_from_row_idx = num_balls_to_be_added; swap_from_row_idx < _num_rows; swap_from_row_idx++){
 		int swap_to_row_idx = swap_from_row_idx - chosen_path.size();
 		BallSprite* swap_from = ball_sprites[swap_from_row_idx][chosen_col_idx];
 		BallSprite* swap_to = ball_sprites[swap_to_row_idx][chosen_col_idx];
 		auto move_to = cocos2d::MoveTo::create(0.5f, swap_to->getPosition());
 		swap_from->runAction(move_to);
-		swap_from->id = swap_to->id;
+		swap_from->id = swap_to_row_idx * _num_cols + chosen_col_idx + 1;
 		ball_sprites[swap_to_row_idx][chosen_col_idx] = swap_from;
-		num_swaps--;
 	}
 
-	if (num_swaps > 0){
-		// Replace the remaining ones
-		int last_row_idx = chosen_path.size() - num_swaps;
-		for(int replace_row_idx = last_row_idx ; replace_row_idx < _num_rows; replace_row_idx++){
-			int rand_color = std::rand() % BallSprite::sprite_paths.size();
-			BallSprite* new_ball = BallSprite::gameSpriteWithFile(BallSprite::sprite_paths.at(rand_color).c_str());
-			new_ball->color = static_cast<Color>(rand_color);
-			new_ball->id = 1 + chosen_col_idx + (replace_row_idx * _num_cols);
-			BallSprite* old_ball = ball_sprites[replace_row_idx][chosen_col_idx];
-			new_ball->setPosition(old_ball->getPosition());
-			new_ball->setScale(8);
-			ball_sprites[replace_row_idx][chosen_col_idx] = new_ball;
-			balls_to_be_added.push_back(new_ball);
-		}
+	for (int new_row_idx = _num_rows - num_balls_to_be_added; new_row_idx < _num_rows; new_row_idx++){
+		int rand_color = std::rand() % BallSprite::sprite_paths.size();
+		BallSprite* new_ball = BallSprite::gameSpriteWithFile(BallSprite::sprite_paths.at(rand_color).c_str());
+		new_ball -> color = static_cast<Color>(rand_color);
+		BallSprite* old_ball = ball_sprites[new_row_idx][chosen_col_idx];
+        new_ball->id = new_row_idx * _num_cols + chosen_col_idx + 1;
+		new_ball->setPosition(old_ball->getPosition());
+		new_ball->setScale(8);
+		ball_sprites[new_row_idx][chosen_col_idx] = new_ball;
+		balls_to_be_added.push_back(new_ball);
 	}
-
+		
 	//TODO add logic for burst ball swaps
 	
 
