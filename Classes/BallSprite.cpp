@@ -1,12 +1,10 @@
 #include "BallSprite.h"
 
-BallSprite::BallSprite(void){
-	_vector = Vec2(0,0);
-}
+BallSprite::BallSprite(void){}
 
-BallSprite::~BallSprite(void){
+BallSprite::~BallSprite(void){}
 
-}
+const std::vector<std::string> BallSprite::sprite_paths = {"blue_ball.png", "yellow_ball.png", "purple_ball.png", "orange_ball.png"};
 
 BallSprite* BallSprite::gameSpriteWithFile(const char* filename){
 	auto sprite = new BallSprite();
@@ -16,13 +14,6 @@ BallSprite* BallSprite::gameSpriteWithFile(const char* filename){
 	}
 	CC_SAFE_DELETE(sprite);
 	return sprite = nullptr;
-}
-
-void BallSprite::setPosition(const Point& pos){
-	Sprite::setPosition(pos);
-	if(!_next_position.equals(pos)){
-		_next_position = pos;
-	}
 }
 
 float BallSprite::radius(){
