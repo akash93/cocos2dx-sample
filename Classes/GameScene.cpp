@@ -35,6 +35,7 @@ bool Game::init(){
 		return false;
 	}
 
+	std::srand(time(NULL));
 	_player_score = 0;
 	_screen_size = Director::getInstance() -> getVisibleSize();
 
@@ -84,25 +85,14 @@ bool Game::onTouchBegan(Touch* touch, Event* event){
 		
 		if(chosen_idx != -1){
 			ball_grid -> setPath(chosen_idx);
-            int num_chosen_action = ball_grid->chosen_path.size();
-            int num_burst_action = ball_grid->burst_balls.size();
-			for (int i = 0; i < NUM_ROWS; i++){
-				for (int j = 0; j < NUM_COLS; j++){
-					auto chosen_action = TintTo::create(0.5f, 40.0f, 40.0f, 40.0f);
-					auto burst_action = ScaleBy::create(0.5f, 1.2f);
-					if(std::find(ball_grid -> chosen_path.begin(),ball_grid -> chosen_path.end(),ball_grid -> ball_sprites[i][j] -> id) != ball_grid -> chosen_path.end() && num_chosen_action > 0){
-						ball_grid->ball_sprites[i][j]->runAction(chosen_action);
-                        num_chosen_action--;
-					}
-					else if(std::find(ball_grid -> burst_balls.begin(),ball_grid -> burst_balls.end(),ball_grid -> ball_sprites[i][j] -> id) != ball_grid -> burst_balls.end() && num_burst_action > 0){
-						ball_grid -> ball_sprites[i][j]->runAction(burst_action);
-                        num_burst_action--;
-					}
-				}
-			}
-			std::vector<BallSprite*> balls_to_be_added = ball_grid->generateNewGrid();
-			for(auto ball : balls_to_be_added){
+			ball_grid -> generateNewGrid();
+
+			for(auto ball : ball_grid -> balls_to_be_added){
 				this->addChild(ball,1);
+			}
+
+			for(auto ball: ball_grid -> balls_to_be_removed){
+				this -> removeChild(ball, true);
 			}
 			return true;
 		}
