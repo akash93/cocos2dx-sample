@@ -4,12 +4,10 @@
 USING_NS_CC;
 
 enum class Color{
-	RED,
 	BLUE,
-	GREEN,
 	YELLOW,
-	ORANGE,
-	PURPLE
+	PURPLE,
+	ORANGE
 };
 
 class BallSprite : public Sprite{
@@ -18,6 +16,7 @@ class BallSprite : public Sprite{
 		BallSprite();
 		virtual ~BallSprite();
 		static BallSprite* gameSpriteWithFile(const char* file_name);
+		static BallSprite* generateRandomSprite();
 		float radius();
 		Color color;
 		int id;

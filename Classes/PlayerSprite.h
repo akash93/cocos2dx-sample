@@ -10,5 +10,4 @@ class PlayerSprite : public Sprite{
 		virtual ~PlayerSprite();
 		static PlayerSprite* gameSpriteWithFile(const char* file_name);
 		float radius();
-		
 };

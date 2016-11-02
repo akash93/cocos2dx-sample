@@ -25,7 +25,6 @@ public:
 	Size _screen_size;
 
 	int _player_score;
-	void updateScore();
 	CREATE_FUNC(Game);
 
 	virtual bool onTouchBegan(Touch* touch, Event* events) override;
