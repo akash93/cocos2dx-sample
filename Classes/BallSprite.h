@@ -18,6 +18,7 @@ class BallSprite : public Sprite{
 		BallSprite();
 		virtual ~BallSprite();
 		static BallSprite* gameSpriteWithFile(const char* file_name);
+		static BallSprite* generateRandomSprite();
 		float radius();
 		Color color;
 		int id;

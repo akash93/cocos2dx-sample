@@ -16,6 +16,14 @@ BallSprite* BallSprite::gameSpriteWithFile(const char* filename){
 	return sprite = nullptr;
 }
 
+BallSprite* BallSprite::generateRandomSprite(){
+	int rand_color_idx = std::rand() % sprite_paths.size();
+	BallSprite* ball = gameSpriteWithFile(sprite_paths.at(rand_color_idx).c_str());
+	ball->color = static_cast<Color>(rand_color_idx);
+	ball->setScale(8);
+	return ball;
+}
+
 float BallSprite::radius(){
 	return getTexture()->getContentSize().width * 0.5f;
 }
