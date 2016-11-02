@@ -4,12 +4,10 @@
 USING_NS_CC;
 
 enum class Color{
-	RED,
 	BLUE,
-	GREEN,
 	YELLOW,
-	ORANGE,
-	PURPLE
+	PURPLE,
+	ORANGE
 };
 
 class BallSprite : public Sprite{
