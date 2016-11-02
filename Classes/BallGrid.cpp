@@ -27,37 +27,37 @@ void BallGrid::generateGrid(int num_cols, int num_rows){
 
 // Set the chosen path and burst ball ids based on chosen index
 void BallGrid::setPath(int chosen_idx){
-    chosen_path = {};
-    burst_balls = {};
-	if(chosen_idx > _num_cols){
+    chosen_path.clear();
+    burst_balls.clear();
+	if (chosen_idx > _num_cols){
 		return; //Invalid selection. Nothing to do
 	}
-	Color chosen_color = ball_sprites[0][chosen_idx - 1] -> color;
+	Color chosen_color = ball_sprites[0][chosen_idx - 1]->color;
 	int i = 0;
-	while(i < _num_rows && ball_sprites[i][chosen_idx - 1] -> color == chosen_color){
-		chosen_path.push_back(ball_sprites[i][chosen_idx - 1] -> id);
+	while (i < _num_rows && ball_sprites[i][chosen_idx - 1]->color == chosen_color){
+		chosen_path.push_back(ball_sprites[i][chosen_idx - 1]->id);
 		i++;
 	}
 	
 	for (int j = 0; j < chosen_path.size(); j++){
-		if(chosen_idx == 1){
-			if(ball_sprites[j][chosen_idx] -> color == chosen_color){
-				burst_balls.push_back(ball_sprites[j][chosen_idx] -> id);
+		if (chosen_idx == 1){
+			if (ball_sprites[j][chosen_idx]->color == chosen_color){
+				burst_balls.push_back(ball_sprites[j][chosen_idx]->id);
 			}
 		}
 
-		else if(chosen_idx == _num_cols){
-			if(ball_sprites[j][chosen_idx - 2] -> color == chosen_color){
-				burst_balls.push_back(ball_sprites[j][chosen_idx - 2] -> id);
+		else if (chosen_idx == _num_cols){
+			if (ball_sprites[j][chosen_idx - 2]->color == chosen_color){
+				burst_balls.push_back(ball_sprites[j][chosen_idx - 2]->id);
 			}
 		}
 		else{
-			if(ball_sprites[j][chosen_idx - 2] -> color == chosen_color){
-				burst_balls.push_back(ball_sprites[j][chosen_idx - 2] -> id);
+			if (ball_sprites[j][chosen_idx - 2]->color == chosen_color){
+				burst_balls.push_back(ball_sprites[j][chosen_idx - 2]->id);
 			}
 
-			if(ball_sprites[j][chosen_idx] -> color == chosen_color){
-				burst_balls.push_back(ball_sprites[j][chosen_idx] -> id);
+			if (ball_sprites[j][chosen_idx]->color == chosen_color){
+				burst_balls.push_back(ball_sprites[j][chosen_idx]->id);
 			}
 		}
 
@@ -69,7 +69,7 @@ void BallGrid::setPath(int chosen_idx){
 
 int BallGrid::getScore(Color player_class, Color enemy_class, int base_attack, int base_burst_damage){
 	int damage_multiplier = 1;
-	Color chosen_color = ball_sprites[0][chosen_path[0] - 1] -> color;
+	Color chosen_color = ball_sprites[0][chosen_path[0] - 1]->color;
 	if (chosen_color == player_class){
 		damage_multiplier *= 2;
 	}
@@ -94,7 +94,7 @@ void BallGrid::generateNewGrid(){
 	int chosen_col_idx = (chosen_path[0] - 1) % _num_cols;
 	
 	//Remove chosen balls
-	for(int row_idx = 0; row_idx < chosen_path.size(); row_idx++){
+	for (int row_idx = 0; row_idx < chosen_path.size(); row_idx++){
 		auto fade_action = cocos2d::FadeOut::create(0.5f);
 		BallSprite* removed_ball = ball_sprites[row_idx][chosen_col_idx];
 		removed_ball->runAction(fade_action);
@@ -102,7 +102,7 @@ void BallGrid::generateNewGrid(){
 	}
 
 	//Move balls in the chosen column down
-	for(int swap_from_row_idx = num_balls_to_be_added; swap_from_row_idx < _num_rows; swap_from_row_idx++){
+	for (int swap_from_row_idx = num_balls_to_be_added; swap_from_row_idx < _num_rows; swap_from_row_idx++){
 		int swap_to_row_idx = swap_from_row_idx - chosen_path.size();
 		BallSprite* swap_from = ball_sprites[swap_from_row_idx][chosen_col_idx];
 		BallSprite* swap_to = ball_sprites[swap_to_row_idx][chosen_col_idx];
@@ -116,7 +116,7 @@ void BallGrid::generateNewGrid(){
 	for (int new_row_idx = _num_rows - num_balls_to_be_added; new_row_idx < _num_rows; new_row_idx++){
 		int rand_color = std::rand() % BallSprite::sprite_paths.size();
 		BallSprite* new_ball = BallSprite::gameSpriteWithFile(BallSprite::sprite_paths.at(rand_color).c_str());
-		new_ball -> color = static_cast<Color>(rand_color);
+		new_ball->color = static_cast<Color>(rand_color);
 		BallSprite* old_ball = ball_sprites[new_row_idx][chosen_col_idx];
         new_ball->id = new_row_idx * _num_cols + chosen_col_idx + 1;
 		new_ball->setPosition(old_ball->getPosition());
@@ -126,7 +126,7 @@ void BallGrid::generateNewGrid(){
 	}
 
 	// For each burst ball: fade the ball and move all balls above it down
-	for( int burst_ball_id : burst_balls ){
+	for (int burst_ball_id : burst_balls ){
 		int burst_ball_col_idx = (burst_ball_id - 1) % _num_cols;
 		int burst_ball_row_idx = (burst_ball_id - 1) / _num_cols;
 		
@@ -137,7 +137,7 @@ void BallGrid::generateNewGrid(){
 		balls_to_be_removed.push_back(burst_ball);
 		//Move balls down
 		auto move_to_position = burst_ball->getPosition();
-		for(int move_from_row_idx = burst_ball_row_idx + 1; move_from_row_idx < _num_rows; move_from_row_idx++){
+		for (int move_from_row_idx = burst_ball_row_idx + 1; move_from_row_idx < _num_rows; move_from_row_idx++){
 			BallSprite* moving_ball = ball_sprites[move_from_row_idx][burst_ball_col_idx];
 			auto move_action = cocos2d::MoveTo::create(0.5f, move_to_position);
 			move_to_position = moving_ball->getPosition();

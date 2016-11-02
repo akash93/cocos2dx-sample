@@ -14,7 +14,7 @@ AppDelegate::~AppDelegate()
 bool AppDelegate::applicationDidFinishLaunching() {
 	auto director = Director::getInstance();
 	auto glview = director->getOpenGLView();
-	if(!glview) {
+	if (!glview) {
 		glview = GLViewImpl::create("Hello World");
 		auto screen_size = glview->getFrameSize();
 		auto design_size = Size(768,1024);
@@ -35,6 +35,6 @@ void AppDelegate::applicationWillEnterForeground() {
 }
 
 void AppDelegate::initGLContextAttrs(){
-	GLContextAttrs gl_context_attrs = {8,8,8,8,24,8};
+	GLContextAttrs gl_context_attrs = {8, 8, 8, 8, 24, 8};
 	GLView::setGLContextAttrs(gl_context_attrs);
 }

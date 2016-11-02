@@ -8,7 +8,7 @@ const std::vector<std::string> BallSprite::sprite_paths = {"blue_ball.png", "yel
 
 BallSprite* BallSprite::gameSpriteWithFile(const char* filename){
 	auto sprite = new BallSprite();
-	if(sprite && sprite->initWithFile(filename)){
+	if (sprite && sprite->initWithFile(filename)){
 		sprite->autorelease();
 		return sprite;
 	}

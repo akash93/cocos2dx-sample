@@ -1,15 +1,12 @@
 #include "PlayerSprite.h"
 
-PlayerSprite::PlayerSprite(void){
-}
+PlayerSprite::PlayerSprite(void){}
 
-PlayerSprite::~PlayerSprite(void){
-
-}
+PlayerSprite::~PlayerSprite(void){}
 
 PlayerSprite* PlayerSprite::gameSpriteWithFile(const char* filename){
 	auto sprite = new PlayerSprite();
-	if(sprite && sprite->initWithFile(filename)){
+	if (sprite && sprite->initWithFile(filename)){
 		sprite->autorelease();
 		return sprite;
 	}
