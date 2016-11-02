@@ -22,6 +22,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 		director->setOpenGLView(glview);
 	}
 	
+	director->setDisplayStats(true);
 	auto scene = Game::createScene();
 	director->runWithScene(scene);
 	
