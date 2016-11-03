@@ -26,7 +26,7 @@ void BallGrid::generateGrid(int num_cols, int num_rows){
 
 // Fill up the chosen path and burst ball vectors based on the chosen column
 // @param chosen_idx: The id of the chosen element
-// Since id starts from one the col index for current element will be chosen_id - 1
+// Since id starts from 1 the col index for current element will be chosen_id - 1
 void BallGrid::setPath(int chosen_idx){
 	//Clear the chosen and burst ball vectors from the previous state
 	chosen_path.clear();

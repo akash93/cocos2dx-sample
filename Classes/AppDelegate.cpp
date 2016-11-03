@@ -1,5 +1,5 @@
 #include "AppDelegate.h"
-#include "GameScene.h"
+#include "HomeScene.h"
 
 USING_NS_CC;
 
@@ -23,7 +23,9 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	}
 	
 	director->setDisplayStats(true);
-	auto scene = Game::createScene();
+	director->setAnimationInterval(1.0 / 60);
+
+	auto scene = HomeScreen::createScene();
 	director->runWithScene(scene);
 	
 	return true;
