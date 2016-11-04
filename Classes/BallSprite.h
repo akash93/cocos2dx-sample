@@ -3,11 +3,15 @@
 
 USING_NS_CC;
 
+#define NUM_CLASSES 5
+#define NUM_SPRITES_PER_CLASS 2
+
 enum class Color{
 	BLUE,
-	YELLOW,
+	GREEN,
 	PURPLE,
-	ORANGE
+	ORANGE,
+	RED
 };
 
 class BallSprite : public Sprite{
@@ -15,10 +19,12 @@ class BallSprite : public Sprite{
 		CC_SYNTHESIZE(Touch*, _touch, Touch);
 		BallSprite();
 		virtual ~BallSprite();
-		static BallSprite* gameSpriteWithFile(const char* file_name);
+		static BallSprite* gameSpriteWithFile(std::string file_name);
 		static BallSprite* generateRandomSprite();
 		float radius();
 		Color color;
 		int id;
-		static const std::vector<std::string> sprite_paths;
+		const static std::string sprite_paths[]; 
+		static Vector<SpriteFrame*> setupAnimation(const char* format);
+
 };

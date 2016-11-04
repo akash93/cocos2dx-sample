@@ -35,10 +35,14 @@ bool Game::init(){
 	std::srand(time(NULL));
 	_player_score = 0;
 	_screen_size = Director::getInstance()->getVisibleSize();
-
+	
+	// Set spacing and starting point of grid
 	auto start_x = _screen_size.width * 0.2;
 	auto start_y = _screen_size.height * 0.5;
-	int distance_measure = 15;
+	int distance_measure = 25;
+	
+	// Load the sprite frame cache
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("ball_sprites.plist");
 
 	// Generate grid
 	ball_grid = new BallGrid();
@@ -75,6 +79,14 @@ bool Game::init(){
 
 bool Game::onTouchBegan(Touch* touch, Event* event){
 	//Check if touch was valid
+	return touch!=nullptr;
+}
+
+void Game::onTouchMoved(Touch* touch, Event* event){
+}
+
+void Game::onTouchEnded(Touch* touch, Event* event){
+	//TODO move grid manipulation steps here so that the change happens when user has lifted finger
 	if (touch!= nullptr){ 
 		auto tap = touch->getLocation();
 		int chosen_idx	= -1;
@@ -100,25 +112,8 @@ bool Game::onTouchBegan(Touch* touch, Event* event){
 			for (auto ball : ball_grid->balls_to_be_added){
 				this->addChild(ball, 1);
 			}
-
-			// Remove the chosen and burst balls from the scene graph
-			for (auto ball: ball_grid->balls_to_be_removed){
-				this->removeChild(ball, true);
-			}
-			return true;
 		}
-
-		return false;
-
 	}
-	return false;
-}
-
-void Game::onTouchMoved(Touch* touch, Event* event){
-}
-
-void Game::onTouchEnded(Touch* touch, Event* event){
-	//TODO move grid manipulation steps here so that the change happens when user has lifted finger
 }
 
 void Game::update(float dt){

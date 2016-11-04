@@ -103,7 +103,9 @@ void BallGrid::moveBallsDown(int start_row_idx, int col_idx, int step_size){
 		BallSprite* swap_from = ball_sprites[swap_from_row_idx][col_idx];
 		BallSprite* swap_to = ball_sprites[swap_to_row_idx][col_idx];
 		auto move_action = cocos2d::MoveTo::create(MOVE_DURATION, swap_to->getPosition());
-		swap_from->runAction(move_action);
+		auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
+		auto move_seq = cocos2d::Sequence::create(delay_action, move_action,nullptr);
+		swap_from->runAction(move_seq);
 		swap_from->id = swap_to_row_idx * _num_cols + col_idx + 1;
 		ball_sprites[swap_to_row_idx][col_idx] = swap_from;
 	}
@@ -111,13 +113,13 @@ void BallGrid::moveBallsDown(int start_row_idx, int col_idx, int step_size){
 
 // Remove a particular ball from the grid
 // @param row_idx, @param col_idx define which ball in the grid needs to be removed
-// Fades the ball and adds it to the balls_to_be_removed vector which is passed to
-// the game scene to remove it from the scene graph
+// scales the ball down to zero and then calls RemoveSelf to remove it from the scene graph
 void BallGrid::removeBall(int row_idx, int col_idx){
-	auto fade_action = cocos2d::FadeOut::create(FADE_DURATION);
+	auto scale_action = cocos2d::ScaleTo::create(SCALE_DURATION, 0.0f);
+	auto remove_action = cocos2d::RemoveSelf::create();
+	auto seq = cocos2d::Sequence::create(scale_action, remove_action, nullptr);
 	BallSprite* removed_ball = ball_sprites[row_idx][col_idx];
-	removed_ball->runAction(fade_action);
-	balls_to_be_removed.push_back(removed_ball);
+	removed_ball->runAction(seq);
 }
 
 // Performs the grid manipulation once chosen_path and burst_balls are fixed.

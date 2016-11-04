@@ -2,8 +2,9 @@
 #include "cocos2d.h"
 #include "BallSprite.h"
 
-#define FADE_DURATION 0.2f
-#define MOVE_DURATION 0.5f
+#define SCALE_DURATION 0.2f
+#define MOVE_DURATION 0.2f
+#define DELAY_DURATION 0.2f
 
 class BallGrid{
 	public:
