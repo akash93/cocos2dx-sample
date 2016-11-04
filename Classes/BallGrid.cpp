@@ -155,7 +155,8 @@ void BallGrid::generateNewGrid(){
 		new_ball->runAction(appear_seq);
 	}
 
-	// For each burst ball; remove the ball and move all balls above it down
+	// For each burst ball; remove the ball and move all balls above it down and
+	// add a new ball to the top most row
 	for (int burst_ball_id : burst_balls ){
 		//Calculate the row and col index based on the id
 		int burst_ball_col_idx = (burst_ball_id - 1) % _num_cols;
