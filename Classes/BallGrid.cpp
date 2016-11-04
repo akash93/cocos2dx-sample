@@ -146,8 +146,13 @@ void BallGrid::generateNewGrid(){
 		BallSprite* old_ball = ball_sprites[new_row_idx][chosen_col_idx];
         new_ball->id = new_row_idx * _num_cols + chosen_col_idx + 1;
 		new_ball->setPosition(old_ball->getPosition());
+		new_ball->setScale(0.0f);
 		ball_sprites[new_row_idx][chosen_col_idx] = new_ball;
 		balls_to_be_added.push_back(new_ball);
+		auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
+		auto scale_action = cocos2d::ScaleTo::create(SCALE_DURATION, 1.0f);
+		auto appear_seq = cocos2d::Sequence::create(delay_action, scale_action, nullptr);
+		new_ball->runAction(appear_seq);
 	}
 
 	// For each burst ball; remove the ball and move all balls above it down
@@ -170,8 +175,14 @@ void BallGrid::generateNewGrid(){
 		int new_row_idx = _num_rows - 1; //Add to last row
 		new_ball->id = new_row_idx * _num_cols + burst_ball_col_idx + 1;
 		new_ball->setPosition(cocos2d::Vec2(new_x, new_y));
+		new_ball->setScale(0.0f);
 		ball_sprites[new_row_idx][burst_ball_col_idx] = new_ball;
 		balls_to_be_added.push_back(new_ball);
+		auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
+		auto scale_action = cocos2d::ScaleTo::create(SCALE_DURATION, 1.0f);
+		auto appear_seq = cocos2d::Sequence::create(delay_action, scale_action, nullptr);
+		new_ball->runAction(appear_seq);
+
 	}
 
 }
