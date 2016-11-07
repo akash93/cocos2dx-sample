@@ -76,41 +76,51 @@ bool Game::init(){
 	return true;
 }
 
+bool Game::isFirstRowSelected(Touch* touch){
+	if(touch!=nullptr){
+		auto tap = touch->getLocation();
+		for(int col_idx = 0; col_idx < NUM_COLS; col_idx++){
+			if(ball_grid->ball_sprites[0][col_idx]->getBoundingBox().containsPoint(tap)){
+				ball_grid->_chosen_idx = col_idx + 1;
+				return true;
+			}
+		}
+		return false;
+	}
+	return false;
+}
 
 bool Game::onTouchBegan(Touch* touch, Event* event){
 	//Check if touch was valid
-	return touch!=nullptr;
+	if(isFirstRowSelected(touch)){
+		ball_grid->setPath(ball_grid->_chosen_idx);
+		ball_grid->highlightPath();
+		return true;
+	}
+
+	return false;
 }
 
 void Game::onTouchMoved(Touch* touch, Event* event){
 }
 
 void Game::onTouchEnded(Touch* touch, Event* event){
-	//TODO move grid manipulation steps here so that the change happens when user has lifted finger
-	if (touch!= nullptr){ 
-		auto tap = touch->getLocation();
-		int chosen_idx	= -1;
+	
+	if (isFirstRowSelected(touch)){
 
-		//Check if ball in first row was touched
-		for (int i = 0; i < NUM_COLS; i++){
-			if (ball_grid->ball_sprites[0][i]->getBoundingBox().containsPoint(tap)){
-			   chosen_idx = ball_grid->ball_sprites[0][i]->id; 
-			   break;
-			}
+		// Animate the balls and manipulate the grid
+		ball_grid->generateNewGrid();
+		ball_grid->highlightPath();
+
+		// Add the new balls to the scene graph
+		for (auto ball : ball_grid->balls_to_be_added){
+			this->addChild(ball, 1);
 		}
 		
-		// If yes then perform then find the path and generate a new grid after that
-		// TODO add animations to highlight the path and move the grid generation to onTouchEnded
-		if (chosen_idx != -1){
-			// Generate the list of chosen balls and burst balls
-			ball_grid->setPath(chosen_idx);
-
-			// Animate the balls and manipulate the grid
-			ball_grid->generateNewGrid();
-
-			// Add the new balls to the scene graph
-			for (auto ball : ball_grid->balls_to_be_added){
-				this->addChild(ball, 1);
+		//reset opacity
+		for ( auto ball_row : ball_grid->ball_sprites ){
+			for (auto ball : ball_row){
+				ball->setOpacity(255);
 			}
 		}
 	}

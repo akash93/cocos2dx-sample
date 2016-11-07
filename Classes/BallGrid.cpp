@@ -70,6 +70,24 @@ void BallGrid::setPath(int chosen_idx){
 			}
 		}
 	}
+
+}
+
+void BallGrid::highlightPath(){
+
+	for (int row_idx = 0; row_idx < _num_rows; row_idx++){
+		for(int col_idx = 0; col_idx < _num_cols; col_idx++){
+			int ball_id = row_idx * _num_cols + col_idx + 1;
+			bool is_chosen = std::find(chosen_path.begin(), chosen_path.end(), ball_id) != chosen_path.end();
+			bool is_burst = std::find(burst_balls.begin(), burst_balls.end(), ball_id) != burst_balls.end();
+			if(!(is_chosen || is_burst)){
+				ball_sprites[row_idx][col_idx]->setOpacity(128);
+			}else{
+				ball_sprites[row_idx][col_idx]->setOpacity(255);
+			}
+		}
+	}
+
 }
 
 // Calculate the score based on the player and enemy stats
