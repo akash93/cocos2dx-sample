@@ -12,6 +12,7 @@ class BallGrid{
 		virtual ~BallGrid();
 		std::vector<std::vector<BallSprite*>> ball_sprites;
 		void generateGrid(int num_cols, int num_rows);
+		void resumeGrid(int num_cols, int num_rows);
 		int _num_cols;
 		int _num_rows;
 		int _chosen_idx;
@@ -30,4 +31,6 @@ class BallGrid{
 		void moveBallsDown(int start_row_idx, int col_idx, int step_size);
 		void removeBall(int row_idx, int col_idx);
 		void generateNewGrid();
+		void saveState();
+		std::vector<int> getCurrentState();
 };
