@@ -15,6 +15,11 @@ class BallGrid{
 		int _num_cols;
 		int _num_rows;
 		int _chosen_idx;
+		float _grid_height;
+		float _grid_width;
+		float _grid_step_x;
+		float _grid_step_y;
+		cocos2d::Point _grid_origin;
 		std::vector<int> chosen_path;
 		std::vector<int> burst_balls;
 		std::vector<BallSprite*> balls_to_be_added;

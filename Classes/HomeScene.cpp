@@ -23,6 +23,12 @@ bool HomeScreen::init(){
 	}
 	
 	_screen_size = Director::getInstance()->getVisibleSize();
+
+	initMenu();
+	return true;
+}
+
+void HomeScreen::initMenu(){
 	
 	auto start_label = Label::createWithTTF("Start Game", "fonts/Marker Felt.ttf",92);
 	auto score_label = Label::createWithTTF("High Scores", "fonts/Marker Felt.ttf",92);
@@ -40,7 +46,6 @@ bool HomeScreen::init(){
 	
 	this->addChild(menu);
 
-	return true;
 }
 
 void HomeScreen::startGameCallback(Ref* sender){

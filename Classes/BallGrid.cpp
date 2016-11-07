@@ -119,8 +119,9 @@ void BallGrid::moveBallsDown(int start_row_idx, int col_idx, int step_size){
 	for(int swap_from_row_idx = start_row_idx; swap_from_row_idx < _num_rows; swap_from_row_idx++){
 		int swap_to_row_idx = swap_from_row_idx - step_size;
 		BallSprite* swap_from = ball_sprites[swap_from_row_idx][col_idx];
-		BallSprite* swap_to = ball_sprites[swap_to_row_idx][col_idx];
-		auto move_action = cocos2d::MoveTo::create(MOVE_DURATION, swap_to->getPosition());
+		auto swap_to_x = _grid_origin.x + col_idx * _grid_step_x;
+		auto swap_to_y = _grid_origin.y + swap_to_row_idx * _grid_step_y;
+		auto move_action = cocos2d::MoveTo::create(MOVE_DURATION, cocos2d::Vec2(swap_to_x, swap_to_y));
 		auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
 		auto move_seq = cocos2d::Sequence::create(delay_action, move_action,nullptr);
 		swap_from->runAction(move_seq);
@@ -161,9 +162,10 @@ void BallGrid::generateNewGrid(){
 	//Add new balls in the chosen column
 	for (int new_row_idx = _num_rows - num_balls_to_be_added; new_row_idx < _num_rows; new_row_idx++){
 		BallSprite* new_ball = BallSprite::generateRandomSprite();
-		BallSprite* old_ball = ball_sprites[new_row_idx][chosen_col_idx];
+		auto old_x = _grid_origin.x + chosen_col_idx * _grid_step_x;
+		auto old_y = _grid_origin.y + new_row_idx * _grid_step_y;
         new_ball->id = new_row_idx * _num_cols + chosen_col_idx + 1;
-		new_ball->setPosition(old_ball->getPosition());
+		new_ball->setPosition(cocos2d::Vec2(old_x, old_y));
 		new_ball->setScale(0.0f);
 		ball_sprites[new_row_idx][chosen_col_idx] = new_ball;
 		balls_to_be_added.push_back(new_ball);
@@ -188,8 +190,8 @@ void BallGrid::generateNewGrid(){
 		// New ball needs to be added to the top most row so get its position 
 		// from the neigbors since the top ball in this column was moved down 
 		// in the previous step
-		auto new_x = ball_sprites[0][burst_ball_col_idx]->getPositionX();
-		auto new_y = ball_sprites[_num_rows - 1][0]->getPositionY();
+		auto new_x = _grid_origin.x + burst_ball_col_idx * _grid_step_x;
+		auto new_y = _grid_height;
 		BallSprite* new_ball = BallSprite::generateRandomSprite();
 		int new_row_idx = _num_rows - 1; //Add to last row
 		new_ball->id = new_row_idx * _num_cols + burst_ball_col_idx + 1;

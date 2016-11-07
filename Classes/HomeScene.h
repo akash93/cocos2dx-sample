@@ -15,6 +15,7 @@ class HomeScreen: public Layer{
 		MenuItemLabel* quit_game;
 		Size _screen_size;
 		CREATE_FUNC(HomeScreen);
+		void initMenu();
 		void gameQuitCallback(Ref* sender);
 		void startGameCallback(Ref* sender);
 		void scoreCallback(Ref* sender);

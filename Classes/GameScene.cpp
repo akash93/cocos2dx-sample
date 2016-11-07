@@ -40,12 +40,14 @@ bool Game::init(){
 	auto start_x = _screen_size.width * 0.2;
 	auto start_y = _screen_size.height * 0.5;
 	int distance_measure = 25;
+
 	
 	// Load the sprite frame cache
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("ball_sprites.plist");
 
 	// Generate grid
 	ball_grid = new BallGrid();
+	ball_grid->_grid_origin = Point(start_x, start_y);
 	ball_grid->generateGrid(NUM_COLS, NUM_ROWS );
 	for (int i = 0; i < NUM_ROWS; i++){
 		for (int j = 0; j < NUM_COLS; j++) {
@@ -55,6 +57,10 @@ bool Game::init(){
 			this->addChild(ball_grid->ball_sprites[i][j], 1);
 		}
 	}
+	ball_grid->_grid_height = ball_grid->ball_sprites[NUM_ROWS - 1][0]->getPositionY();
+	ball_grid->_grid_width = ball_grid->ball_sprites[0][NUM_COLS - 1]->getPositionX();
+	ball_grid->_grid_step_x = ball_grid->ball_sprites[0][1]->getPositionX() - ball_grid->ball_sprites[0][0]->getPositionX();
+	ball_grid->_grid_step_y = ball_grid->ball_sprites[1][0]->getPositionY() - ball_grid->ball_sprites[0][0]->getPositionY();
 
 	// Register touch listeners
 	auto listener = EventListenerTouchOneByOne::create();
