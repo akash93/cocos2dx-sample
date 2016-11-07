@@ -70,6 +70,24 @@ void BallGrid::setPath(int chosen_idx){
 			}
 		}
 	}
+
+}
+
+void BallGrid::highlightPath(){
+
+	for (int row_idx = 0; row_idx < _num_rows; row_idx++){
+		for(int col_idx = 0; col_idx < _num_cols; col_idx++){
+			int ball_id = row_idx * _num_cols + col_idx + 1;
+			bool is_chosen = std::find(chosen_path.begin(), chosen_path.end(), ball_id) != chosen_path.end();
+			bool is_burst = std::find(burst_balls.begin(), burst_balls.end(), ball_id) != burst_balls.end();
+			if(!(is_chosen || is_burst)){
+				ball_sprites[row_idx][col_idx]->setOpacity(128);
+			}else{
+				ball_sprites[row_idx][col_idx]->setOpacity(255);
+			}
+		}
+	}
+
 }
 
 // Calculate the score based on the player and enemy stats
@@ -103,7 +121,9 @@ void BallGrid::moveBallsDown(int start_row_idx, int col_idx, int step_size){
 		BallSprite* swap_from = ball_sprites[swap_from_row_idx][col_idx];
 		BallSprite* swap_to = ball_sprites[swap_to_row_idx][col_idx];
 		auto move_action = cocos2d::MoveTo::create(MOVE_DURATION, swap_to->getPosition());
-		swap_from->runAction(move_action);
+		auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
+		auto move_seq = cocos2d::Sequence::create(delay_action, move_action,nullptr);
+		swap_from->runAction(move_seq);
 		swap_from->id = swap_to_row_idx * _num_cols + col_idx + 1;
 		ball_sprites[swap_to_row_idx][col_idx] = swap_from;
 	}
@@ -111,13 +131,13 @@ void BallGrid::moveBallsDown(int start_row_idx, int col_idx, int step_size){
 
 // Remove a particular ball from the grid
 // @param row_idx, @param col_idx define which ball in the grid needs to be removed
-// Fades the ball and adds it to the balls_to_be_removed vector which is passed to
-// the game scene to remove it from the scene graph
+// scales the ball down to zero and then calls RemoveSelf to remove it from the scene graph
 void BallGrid::removeBall(int row_idx, int col_idx){
-	auto fade_action = cocos2d::FadeOut::create(FADE_DURATION);
+	auto scale_action = cocos2d::ScaleTo::create(SCALE_DURATION, 0.0f);
+	auto remove_action = cocos2d::RemoveSelf::create();
+	auto seq = cocos2d::Sequence::create(scale_action, remove_action, nullptr);
 	BallSprite* removed_ball = ball_sprites[row_idx][col_idx];
-	removed_ball->runAction(fade_action);
-	balls_to_be_removed.push_back(removed_ball);
+	removed_ball->runAction(seq);
 }
 
 // Performs the grid manipulation once chosen_path and burst_balls are fixed.
@@ -144,11 +164,17 @@ void BallGrid::generateNewGrid(){
 		BallSprite* old_ball = ball_sprites[new_row_idx][chosen_col_idx];
         new_ball->id = new_row_idx * _num_cols + chosen_col_idx + 1;
 		new_ball->setPosition(old_ball->getPosition());
+		new_ball->setScale(0.0f);
 		ball_sprites[new_row_idx][chosen_col_idx] = new_ball;
 		balls_to_be_added.push_back(new_ball);
+		auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
+		auto scale_action = cocos2d::ScaleTo::create(SCALE_DURATION, 1.0f);
+		auto appear_seq = cocos2d::Sequence::create(delay_action, scale_action, nullptr);
+		new_ball->runAction(appear_seq);
 	}
 
-	// For each burst ball; remove the ball and move all balls above it down
+	// For each burst ball; remove the ball and move all balls above it down and
+	// add a new ball to the top most row
 	for (int burst_ball_id : burst_balls ){
 		//Calculate the row and col index based on the id
 		int burst_ball_col_idx = (burst_ball_id - 1) % _num_cols;
@@ -168,8 +194,14 @@ void BallGrid::generateNewGrid(){
 		int new_row_idx = _num_rows - 1; //Add to last row
 		new_ball->id = new_row_idx * _num_cols + burst_ball_col_idx + 1;
 		new_ball->setPosition(cocos2d::Vec2(new_x, new_y));
+		new_ball->setScale(0.0f);
 		ball_sprites[new_row_idx][burst_ball_col_idx] = new_ball;
 		balls_to_be_added.push_back(new_ball);
+		auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
+		auto scale_action = cocos2d::ScaleTo::create(SCALE_DURATION, 1.0f);
+		auto appear_seq = cocos2d::Sequence::create(delay_action, scale_action, nullptr);
+		new_ball->runAction(appear_seq);
+
 	}
 
 }

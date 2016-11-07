@@ -30,6 +30,7 @@ public:
 	virtual bool onTouchBegan(Touch* touch, Event* events) override;
 	virtual void onTouchMoved(Touch* touch, Event* events) override;
 	virtual void onTouchEnded(Touch* touch, Event* events) override;
+	bool isFirstRowSelected(Touch* touch);
 	
 	void update(float dt) override;
 	

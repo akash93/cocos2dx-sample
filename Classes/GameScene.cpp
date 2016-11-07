@@ -35,10 +35,14 @@ bool Game::init(){
 	std::srand(time(NULL));
 	_player_score = 0;
 	_screen_size = Director::getInstance()->getVisibleSize();
-
+	
+	// Set spacing and starting point of grid
 	auto start_x = _screen_size.width * 0.2;
 	auto start_y = _screen_size.height * 0.5;
-	int distance_measure = 15;
+	int distance_measure = 25;
+	
+	// Load the sprite frame cache
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("ball_sprites.plist");
 
 	// Generate grid
 	ball_grid = new BallGrid();
@@ -72,45 +76,28 @@ bool Game::init(){
 	return true;
 }
 
+bool Game::isFirstRowSelected(Touch* touch){
+	if(touch!=nullptr){
+		auto tap = touch->getLocation();
+		for(int col_idx = 0; col_idx < NUM_COLS; col_idx++){
+			if(ball_grid->ball_sprites[0][col_idx]->getBoundingBox().containsPoint(tap)){
+				ball_grid->_chosen_idx = col_idx + 1;
+				return true;
+			}
+		}
+		return false;
+	}
+	return false;
+}
 
 bool Game::onTouchBegan(Touch* touch, Event* event){
 	//Check if touch was valid
-	if (touch!= nullptr){ 
-		auto tap = touch->getLocation();
-		int chosen_idx	= -1;
-
-		//Check if ball in first row was touched
-		for (int i = 0; i < NUM_COLS; i++){
-			if (ball_grid->ball_sprites[0][i]->getBoundingBox().containsPoint(tap)){
-			   chosen_idx = ball_grid->ball_sprites[0][i]->id; 
-			   break;
-			}
-		}
-		
-		// If yes then perform then find the path and generate a new grid after that
-		// TODO add animations to highlight the path and move the grid generation to onTouchEnded
-		if (chosen_idx != -1){
-			// Generate the list of chosen balls and burst balls
-			ball_grid->setPath(chosen_idx);
-
-			// Animate the balls and manipulate the grid
-			ball_grid->generateNewGrid();
-
-			// Add the new balls to the scene graph
-			for (auto ball : ball_grid->balls_to_be_added){
-				this->addChild(ball, 1);
-			}
-
-			// Remove the chosen and burst balls from the scene graph
-			for (auto ball: ball_grid->balls_to_be_removed){
-				this->removeChild(ball, true);
-			}
-			return true;
-		}
-
-		return false;
-
+	if(isFirstRowSelected(touch)){
+		ball_grid->setPath(ball_grid->_chosen_idx);
+		ball_grid->highlightPath();
+		return true;
 	}
+
 	return false;
 }
 
@@ -118,7 +105,25 @@ void Game::onTouchMoved(Touch* touch, Event* event){
 }
 
 void Game::onTouchEnded(Touch* touch, Event* event){
-	//TODO move grid manipulation steps here so that the change happens when user has lifted finger
+	
+	if (isFirstRowSelected(touch)){
+
+		// Animate the balls and manipulate the grid
+		ball_grid->generateNewGrid();
+		ball_grid->highlightPath();
+
+		// Add the new balls to the scene graph
+		for (auto ball : ball_grid->balls_to_be_added){
+			this->addChild(ball, 1);
+		}
+		
+		//reset opacity
+		for ( auto ball_row : ball_grid->ball_sprites ){
+			for (auto ball : ball_row){
+				ball->setOpacity(255);
+			}
+		}
+	}
 }
 
 void Game::update(float dt){
