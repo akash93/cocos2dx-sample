@@ -36,10 +36,10 @@ void BallGrid::resumeGrid(int num_cols, int num_rows){
 	for (int i = 0; i < num_rows; i++) {
 		std::vector<BallSprite*> rows;
 		for (int j = 0; j < num_cols; j++) {
-
-			BallSprite* ball_sprite = BallSprite::gameSpriteWithFile(BallSprite::sprite_paths[ball_classes[ball_idx - 1]]);
+			int color_idx = ball_classes[ball_idx - 1];
+			BallSprite* ball_sprite = BallSprite::gameSpriteWithFile(BallSprite::sprite_paths[color_idx]);
 			ball_sprite->id = ball_idx;
-			ball_sprite->color = static_cast<Color>(ball_classes[ball_idx - 1]);
+			ball_sprite->color = static_cast<Color>(color_idx);
 			rows.push_back(ball_sprite);
 			ball_idx++;
 		}
@@ -101,11 +101,11 @@ void BallGrid::setPath(int chosen_idx){
 void BallGrid::highlightPath(){
 
 	for (int row_idx = 0; row_idx < _num_rows; row_idx++){
-		for(int col_idx = 0; col_idx < _num_cols; col_idx++){
+		for (int col_idx = 0; col_idx < _num_cols; col_idx++){
 			int ball_id = row_idx * _num_cols + col_idx + 1;
 			bool is_chosen = std::find(chosen_path.begin(), chosen_path.end(), ball_id) != chosen_path.end();
 			bool is_burst = std::find(burst_balls.begin(), burst_balls.end(), ball_id) != burst_balls.end();
-			if(is_chosen || is_burst){
+			if (is_chosen || is_burst){
 				ball_sprites[row_idx][col_idx]->setOpacity(255);
 			}else{
 				ball_sprites[row_idx][col_idx]->setOpacity(128);
@@ -141,7 +141,7 @@ int BallGrid::getScore(Color player_class, Color enemy_class, int base_attack, i
 // @param col_idx: Column index of the balls
 // @param step_size: The number of spaces the balls have to shift by
 void BallGrid::moveBallsDown(int start_row_idx, int col_idx, int step_size){
-	for(int swap_from_row_idx = start_row_idx; swap_from_row_idx < _num_rows; swap_from_row_idx++){
+	for (int swap_from_row_idx = start_row_idx; swap_from_row_idx < _num_rows; swap_from_row_idx++){
 		int swap_to_row_idx = swap_from_row_idx - step_size;
 		BallSprite* swap_from = ball_sprites[swap_from_row_idx][col_idx];
 		auto swap_to_x = _grid_origin.x + col_idx * _grid_step_x;
@@ -153,6 +153,22 @@ void BallGrid::moveBallsDown(int start_row_idx, int col_idx, int step_size){
 		swap_from->id = swap_to_row_idx * _num_cols + col_idx + 1;
 		ball_sprites[swap_to_row_idx][col_idx] = swap_from;
 	}
+}
+
+void BallGrid::addBall(int row_idx, int col_idx){
+	BallSprite* new_ball = BallSprite::generateRandomSprite();
+	auto old_x = _grid_origin.x + col_idx * _grid_step_x;
+	auto old_y = _grid_origin.y + row_idx * _grid_step_y;
+	new_ball->id = row_idx * _num_cols + col_idx + 1;
+	new_ball->setPosition(cocos2d::Vec2(old_x, old_y));
+	new_ball->setScale(0.0f);
+	ball_sprites[row_idx][col_idx] = new_ball;
+	balls_to_be_added.push_back(new_ball);
+	auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
+	auto scale_action = cocos2d::ScaleTo::create(SCALE_DURATION, 1.0f);
+	auto appear_seq = cocos2d::Sequence::create(delay_action, scale_action, nullptr);
+	new_ball->runAction(appear_seq);
+
 }
 
 // Remove a particular ball from the grid
@@ -171,7 +187,6 @@ void BallGrid::generateNewGrid(){
 
 	//Clear the vectors from the previous turn
 	balls_to_be_added.clear();
-	balls_to_be_removed.clear();
 	int num_balls = _num_rows * _num_cols;
     int num_balls_to_be_added = chosen_path.size();
 	int chosen_col_idx = (chosen_path[0] - 1) % _num_cols;
@@ -186,18 +201,7 @@ void BallGrid::generateNewGrid(){
 	
 	//Add new balls in the chosen column
 	for (int new_row_idx = _num_rows - num_balls_to_be_added; new_row_idx < _num_rows; new_row_idx++){
-		BallSprite* new_ball = BallSprite::generateRandomSprite();
-		auto old_x = _grid_origin.x + chosen_col_idx * _grid_step_x;
-		auto old_y = _grid_origin.y + new_row_idx * _grid_step_y;
-        new_ball->id = new_row_idx * _num_cols + chosen_col_idx + 1;
-		new_ball->setPosition(cocos2d::Vec2(old_x, old_y));
-		new_ball->setScale(0.0f);
-		ball_sprites[new_row_idx][chosen_col_idx] = new_ball;
-		balls_to_be_added.push_back(new_ball);
-		auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
-		auto scale_action = cocos2d::ScaleTo::create(SCALE_DURATION, 1.0f);
-		auto appear_seq = cocos2d::Sequence::create(delay_action, scale_action, nullptr);
-		new_ball->runAction(appear_seq);
+		addBall(new_row_idx, chosen_col_idx);
 	}
 
 	// For each burst ball; remove the ball and move all balls above it down and
@@ -215,31 +219,20 @@ void BallGrid::generateNewGrid(){
 		// New ball needs to be added to the top most row so get its position 
 		// from the neigbors since the top ball in this column was moved down 
 		// in the previous step
-		auto new_x = _grid_origin.x + burst_ball_col_idx * _grid_step_x;
-		auto new_y = _grid_height;
-		BallSprite* new_ball = BallSprite::generateRandomSprite();
-		int new_row_idx = _num_rows - 1; //Add to last row
-		new_ball->id = new_row_idx * _num_cols + burst_ball_col_idx + 1;
-		new_ball->setPosition(cocos2d::Vec2(new_x, new_y));
-		new_ball->setScale(0.0f);
-		ball_sprites[new_row_idx][burst_ball_col_idx] = new_ball;
-		balls_to_be_added.push_back(new_ball);
-		auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
-		auto scale_action = cocos2d::ScaleTo::create(SCALE_DURATION, 1.0f);
-		auto appear_seq = cocos2d::Sequence::create(delay_action, scale_action, nullptr);
-		new_ball->runAction(appear_seq);
-
+		addBall(_num_rows - 1, burst_ball_col_idx);
 	}
 	
 	saveState();
 
 }
 
+
+//Saves the current state of the grid (classes of all balls) to a plist file.
 void BallGrid::saveState(){
 	std::string writable_path = cocos2d::FileUtils::getInstance()->getWritablePath();
 	std::string full_path = writable_path + "save.plist";
 	cocos2d::ValueVector ball_classes;
-	for(int row_idx = 0; row_idx < _num_rows; row_idx++){
+	for (int row_idx = 0; row_idx < _num_rows; row_idx++){
 		for (int col_idx = 0; col_idx < _num_cols; col_idx++){\
 			int ball_color = static_cast<int> (ball_sprites[row_idx][col_idx]->color);
 			ball_classes.push_back(cocos2d::Value(ball_color));
@@ -249,14 +242,17 @@ void BallGrid::saveState(){
 	cocos2d::UserDefault::getInstance()->setBoolForKey("save_exists", true);
 }
 
+
+// Retrieve the current state from a saved file. 
+// @returns vector containing classes of the balls in the grid
 std::vector<int> BallGrid::getCurrentState(){
     std::string writable_path = cocos2d::FileUtils::getInstance()->getWritablePath();
 	std::string full_path = writable_path + "save.plist";
 	cocos2d::ValueVector class_values = cocos2d::FileUtils::getInstance()->getValueVectorFromFile(full_path.c_str());
 	std::vector<int> ball_classes;
 	for (int i = 0 ; i < class_values.size(); i++){
-		ball_classes.push_back(class_values.at(i).asInt());
+		ball_classes.push_back(class_values[i].asInt());
 	}
-    
+
     return ball_classes;
 }

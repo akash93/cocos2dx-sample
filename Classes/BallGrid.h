@@ -24,11 +24,11 @@ class BallGrid{
 		std::vector<int> chosen_path;
 		std::vector<int> burst_balls;
 		std::vector<BallSprite*> balls_to_be_added;
-		std::vector<BallSprite*> balls_to_be_removed;
 		void setPath(int chosen_idx);
 		void highlightPath();
 		int getScore(Color player_class, Color enemy_class, int base_attack, int base_burst_damage);
 		void moveBallsDown(int start_row_idx, int col_idx, int step_size);
+		void addBall(int row_idx, int col_idx);
 		void removeBall(int row_idx, int col_idx);
 		void generateNewGrid();
 		void saveState();
