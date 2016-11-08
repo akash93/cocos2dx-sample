@@ -66,6 +66,8 @@ void BallGrid::setPath(int chosen_idx){
 		chosen_path.push_back(ball_sprites[i][chosen_idx - 1]->id);
 		i++;
 	}
+    
+    getChosenPath(chosen_idx, chosen_color);
 	
 	// For each ball in chosen path check if neighbors are same color and add them to
 	// burst_balls
@@ -96,6 +98,56 @@ void BallGrid::setPath(int chosen_idx){
 
 }
 
+void BallGrid::getChosenPath(int chosen_idx, Color chosen_color){
+	
+	std::vector<std::vector<int>> longest_lengths;
+	std::vector<int> longest_path_ids;
+
+	//Initialize length matrix
+	for(int i = 0; i < _num_rows; i++){
+		std::vector<int> rows;
+		for (int j = 0; j < _num_cols; j++){
+			if(ball_sprites[i][j]->color == chosen_color){
+				rows.push_back(1);
+			}
+			else{
+				rows.push_back(-1);
+			}
+		}
+		longest_lengths.push_back(rows);
+	}
+
+	for(int row_idx = _num_rows - 1; row_idx >= 0; row_idx--){
+		for(int col_idx = 0; col_idx < _num_cols; col_idx++){
+            if(ball_sprites[row_idx][col_idx]->color == chosen_color){
+                int a  = 0, b = 0;
+                if (row_idx + 1 < _num_rows && ball_sprites[row_idx + 1][col_idx]->color == chosen_color){
+                    a = longest_lengths[row_idx + 1][col_idx];
+                }
+                if (row_idx + 1 < _num_rows && col_idx + 1 < _num_cols && ball_sprites[row_idx + 1][col_idx + 1]->color == chosen_color){
+                    b = longest_lengths[row_idx + 1][col_idx + 1];
+                }
+                longest_lengths[row_idx][col_idx] = 1 + std::max(a, b);
+            }
+		}
+	}
+
+	longest_path_ids.push_back(chosen_idx);
+	int path_length = longest_lengths[0][chosen_idx - 1];
+	int curr_col = chosen_idx - 1;
+	for (int i = 0; i < _num_rows - 1 && path_length > 0; i++){
+		if (longest_lengths[i + 1][curr_col] == path_length - 1){
+			int ball_id = (i + 1) * _num_cols + curr_col + 1;
+			longest_path_ids.push_back(ball_id);
+		}
+		else if (curr_col + 1 < _num_cols && longest_lengths[i + 1][curr_col + 1] == path_length - 1){
+			int ball_id = (i + 1) * _num_cols + curr_col + 2;
+			longest_path_ids.push_back(ball_id);
+			curr_col +=1;
+		}
+		path_length -= 1;
+	}
+}
 
 // Higlight the chosen path and burst balls for a given choice
 void BallGrid::highlightPath(){
