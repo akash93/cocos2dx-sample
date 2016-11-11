@@ -169,9 +169,9 @@ void BallGrid::getChosenPath(int chosen_idx, Color chosen_color){
 	std::vector<int> balls_to_be_removed = longest_path_ids;
 	balls_to_be_removed.insert(balls_to_be_removed.end(), longest_path_burst_balls.begin(), longest_path_burst_balls.end());
 	std::sort(balls_to_be_removed.begin(), balls_to_be_removed.end());
-	std::vector<std::vector<int>> remove_balls;
+	std::vector<std::deque<int>> remove_balls;
 	for (int i = 0; i < _num_cols; i++){
-		std::vector<int> cols = {};
+		std::deque<int> cols = {};
 		remove_balls.push_back(cols);
 	}
 
@@ -181,7 +181,7 @@ void BallGrid::getChosenPath(int chosen_idx, Color chosen_color){
 	}
 
 	for (int col_idx = 0; col_idx < _num_cols; col_idx++){
-		std::vector<int> col_balls_remove = remove_balls[col_idx];
+		std::deque<int> col_balls_remove = remove_balls[col_idx];
 		std::deque<int> movable_balls;
 		if (col_balls_remove.size() != 0){
 			//find which balls can be moved in the current column
@@ -199,26 +199,27 @@ void BallGrid::getChosenPath(int chosen_idx, Color chosen_color){
 				int swap_to_row_idx = (col_balls_remove[0] - 1) / _num_rows;
 				auto move_to_x = _grid_origin.x + (col_idx * _grid_step_x);
 				auto move_to_y = _grid_origin.y + (swap_to_row_idx * _grid_step_y);
-				removeBall(swap_to_row_idx, col_idx);
-				BallSprite* moving_ball = ball_sprites[swap_from_row_idx][col_idx];
-				auto move_action = cocos2d::MoveTo::create(MOVE_DURATION, cocos2d::Vec2(move_to_x, move_to_y));
-				auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
-				auto seq = cocos2d::Sequence::create(delay_action, move_action, nullptr);
-				moving_ball->runAction(seq);
-				moving_ball->id = swap_to_row_idx * _num_cols + col_idx + 1;
-				ball_sprites[swap_to_row_idx][col_idx] = moving_ball;
+				/* removeBall(swap_to_row_idx, col_idx); */
+				/* BallSprite* moving_ball = ball_sprites[swap_from_row_idx][col_idx]; */
+				/* auto move_action = cocos2d::MoveTo::create(MOVE_DURATION, cocos2d::Vec2(move_to_x, move_to_y)); */
+				/* auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION); */
+				/* auto seq = cocos2d::Sequence::create(delay_action, move_action, nullptr); */
+				/* moving_ball->runAction(seq); */
+				/* moving_ball->id = swap_to_row_idx * _num_cols + col_idx + 1; */
+				/* ball_sprites[swap_to_row_idx][col_idx] = moving_ball; */
+				col_balls_remove.pop_front();
 				col_balls_remove.push_back(movable_ball_id);
 				std::sort(col_balls_remove.begin(), col_balls_remove.end());
-				movable_balls.erase(movable_balls.begin());
+				movable_balls.pop_front();
 			}
 
 			// Only case that remains is that there are still some balls which need to be removed. But the previous step 
 			// ensures that they will all be at the top of the column
 			int num_balls_to_be_added = col_balls_remove.size();
-			for (int row_idx = _num_rows - num_balls_to_be_added; row_idx < _num_rows; row_idx++){
-				removeBall(row_idx, col_idx);
-				addBall(row_idx, col_idx);
-			}
+			/* for (int row_idx = _num_rows - num_balls_to_be_added; row_idx < _num_rows; row_idx++){ */
+			/* 	removeBall(row_idx, col_idx); */
+			/* 	addBall(row_idx, col_idx); */
+			/* } */
 		}
 	}
 
