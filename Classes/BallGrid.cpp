@@ -24,6 +24,29 @@ void BallGrid::generateGrid(int num_cols, int num_rows){
 
 }
 
+// Loads a previously saved configuration. 
+// @param num_rows: Number of rows in the grid
+// @param num_cols: Number of columns in the grid
+// @param ball_classes: Vector containing the classes of every ball in the saved config
+void BallGrid::resumeGrid(int num_cols, int num_rows){
+	_num_cols = num_cols;
+	_num_rows = num_rows;
+	std::vector<int> ball_classes = getCurrentState();
+	int ball_idx = 1;
+	for (int i = 0; i < num_rows; i++) {
+		std::vector<BallSprite*> rows;
+		for (int j = 0; j < num_cols; j++) {
+			int color_idx = ball_classes[ball_idx - 1];
+			BallSprite* ball_sprite = BallSprite::gameSpriteWithFile(BallSprite::sprite_paths[color_idx]);
+			ball_sprite->id = ball_idx;
+			ball_sprite->color = static_cast<Color>(color_idx);
+			rows.push_back(ball_sprite);
+			ball_idx++;
+		}
+		ball_sprites.push_back(rows);
+	}
+}
+
 // Fill up the chosen path and burst ball vectors based on the chosen column
 // @param chosen_idx: The id of the chosen element
 // Since id starts from 1 the col index for current element will be chosen_id - 1
@@ -31,59 +54,93 @@ void BallGrid::setPath(int chosen_idx){
 	//Clear the chosen and burst ball vectors from the previous state
 	chosen_path.clear();
 	burst_balls.clear();
-	if (chosen_idx > _num_cols){
-		return; //Invalid selection. Nothing to do
-	}
-
-	// Get the color of the chosen ball and find the longest path with the given color
+		// Get the color of the chosen ball and find the longest path with the given color
 	// and add it to chosen path
 	Color chosen_color = ball_sprites[0][chosen_idx - 1]->color;
-	int i = 0;
-	while (i < _num_rows && ball_sprites[i][chosen_idx - 1]->color == chosen_color){
-		chosen_path.push_back(ball_sprites[i][chosen_idx - 1]->id);
-		i++;
+	getChosenPath(chosen_idx, chosen_color);
+
+}
+
+void BallGrid::getChosenPath(int chosen_idx, Color chosen_color){
+	
+	std::vector<std::vector<int>> longest_lengths;
+
+	//Initialize length matrix
+	for(int i = 0; i < _num_rows; i++){
+		std::vector<int> rows;
+		for (int j = 0; j < _num_cols; j++){
+			if(ball_sprites[i][j]->color == chosen_color){
+				rows.push_back(1);
+			}
+			else{
+				rows.push_back(-1);
+			}
+		}
+		longest_lengths.push_back(rows);
+	}
+
+	for(int row_idx = _num_rows - 1; row_idx >= 0; row_idx--){
+		for(int col_idx = 0; col_idx < _num_cols; col_idx++){
+			if(ball_sprites[row_idx][col_idx]->color == chosen_color){
+				int a  = 0, b = 0;
+				if (row_idx + 1 < _num_rows && ball_sprites[row_idx + 1][col_idx]->color == chosen_color){
+					a = longest_lengths[row_idx + 1][col_idx];
+				}
+				if (row_idx + 1 < _num_rows && col_idx + 1 < _num_cols && ball_sprites[row_idx + 1][col_idx + 1]->color == chosen_color){
+					b = longest_lengths[row_idx + 1][col_idx + 1];
+				}
+				longest_lengths[row_idx][col_idx] = 1 + std::max(a, b);
+			}
+		}
+	}
+
+	chosen_path.push_back(chosen_idx);
+	int path_length = longest_lengths[0][chosen_idx - 1];
+	int curr_col = chosen_idx - 1;
+	for (int i = 0; i < _num_rows - 1 && path_length > 0; i++){
+		if (longest_lengths[i + 1][curr_col] == path_length - 1){
+			int ball_id = (i + 1) * _num_cols + curr_col + 1;
+			chosen_path.push_back(ball_id);
+		}
+		else if (curr_col + 1 < _num_cols && longest_lengths[i + 1][curr_col + 1] == path_length - 1){
+			int ball_id = (i + 1) * _num_cols + curr_col + 2;
+			chosen_path.push_back(ball_id);
+			curr_col +=1;
+		}
+		path_length -= 1;
 	}
 	
-	// For each ball in chosen path check if neighbors are same color and add them to
-	// burst_balls
-	for (int j = 0; j < chosen_path.size(); j++){
-		// First column -> 1 neighbor (right)
-		if (chosen_idx == 1){
-			if (ball_sprites[j][chosen_idx]->color == chosen_color){
-				burst_balls.push_back(ball_sprites[j][chosen_idx]->id);
-			}
+	// Find the burst balls corresponding the longest path
+	for (int ball_id : chosen_path){
+		int row_idx = (ball_id - 1) / _num_cols;
+		int col_idx = (ball_id - 1) % _num_cols;
+		
+		//Check left
+		if (col_idx != 0 && ball_sprites[row_idx][col_idx - 1]->color == chosen_color){
+			int burst_ball_id = row_idx * _num_cols + col_idx;
+			burst_balls.push_back(burst_ball_id);
 		}
-		// Last column -> 1 neighbor (left)
-		else if (chosen_idx == _num_cols){
-			if (ball_sprites[j][chosen_idx - 2]->color == chosen_color){
-				burst_balls.push_back(ball_sprites[j][chosen_idx - 2]->id);
-			}
-		}
-		// Otherwise 2 neighbors (left and right)
-		else{
-			if (ball_sprites[j][chosen_idx - 2]->color == chosen_color){
-				burst_balls.push_back(ball_sprites[j][chosen_idx - 2]->id);
-			}
 
-			if (ball_sprites[j][chosen_idx]->color == chosen_color){
-				burst_balls.push_back(ball_sprites[j][chosen_idx]->id);
-			}
+		if (col_idx != _num_cols - 1 && ball_sprites[row_idx][col_idx + 1]->color == chosen_color){
+			int burst_ball_id = row_idx * _num_cols + col_idx + 2;
+			burst_balls.push_back(burst_ball_id);
 		}
 	}
 
 }
 
+// Higlight the chosen path and burst balls for a given choice
 void BallGrid::highlightPath(){
 
 	for (int row_idx = 0; row_idx < _num_rows; row_idx++){
-		for(int col_idx = 0; col_idx < _num_cols; col_idx++){
+		for (int col_idx = 0; col_idx < _num_cols; col_idx++){
 			int ball_id = row_idx * _num_cols + col_idx + 1;
 			bool is_chosen = std::find(chosen_path.begin(), chosen_path.end(), ball_id) != chosen_path.end();
 			bool is_burst = std::find(burst_balls.begin(), burst_balls.end(), ball_id) != burst_balls.end();
-			if(!(is_chosen || is_burst)){
-				ball_sprites[row_idx][col_idx]->setOpacity(128);
-			}else{
+			if (is_chosen || is_burst){
 				ball_sprites[row_idx][col_idx]->setOpacity(255);
+			}else{
+				ball_sprites[row_idx][col_idx]->setOpacity(128);
 			}
 		}
 	}
@@ -116,17 +173,34 @@ int BallGrid::getScore(Color player_class, Color enemy_class, int base_attack, i
 // @param col_idx: Column index of the balls
 // @param step_size: The number of spaces the balls have to shift by
 void BallGrid::moveBallsDown(int start_row_idx, int col_idx, int step_size){
-	for(int swap_from_row_idx = start_row_idx; swap_from_row_idx < _num_rows; swap_from_row_idx++){
+	for (int swap_from_row_idx = start_row_idx; swap_from_row_idx < _num_rows; swap_from_row_idx++){
 		int swap_to_row_idx = swap_from_row_idx - step_size;
 		BallSprite* swap_from = ball_sprites[swap_from_row_idx][col_idx];
-		BallSprite* swap_to = ball_sprites[swap_to_row_idx][col_idx];
-		auto move_action = cocos2d::MoveTo::create(MOVE_DURATION, swap_to->getPosition());
+		auto swap_to_x = _grid_origin.x + col_idx * _grid_step_x;
+		auto swap_to_y = _grid_origin.y + swap_to_row_idx * _grid_step_y;
+		auto move_action = cocos2d::MoveTo::create(MOVE_DURATION, cocos2d::Vec2(swap_to_x, swap_to_y));
 		auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
 		auto move_seq = cocos2d::Sequence::create(delay_action, move_action,nullptr);
 		swap_from->runAction(move_seq);
 		swap_from->id = swap_to_row_idx * _num_cols + col_idx + 1;
 		ball_sprites[swap_to_row_idx][col_idx] = swap_from;
 	}
+}
+
+void BallGrid::addBall(int row_idx, int col_idx){
+	BallSprite* new_ball = BallSprite::generateRandomSprite();
+	auto old_x = _grid_origin.x + col_idx * _grid_step_x;
+	auto old_y = _grid_origin.y + row_idx * _grid_step_y;
+	new_ball->id = row_idx * _num_cols + col_idx + 1;
+	new_ball->setPosition(cocos2d::Vec2(old_x, old_y));
+	new_ball->setScale(0.0f);
+	ball_sprites[row_idx][col_idx] = new_ball;
+	balls_to_be_added.push_back(new_ball);
+	auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
+	auto scale_action = cocos2d::ScaleTo::create(SCALE_DURATION, 1.0f);
+	auto appear_seq = cocos2d::Sequence::create(delay_action, scale_action, nullptr);
+	new_ball->runAction(appear_seq);
+
 }
 
 // Remove a particular ball from the grid
@@ -145,63 +219,101 @@ void BallGrid::generateNewGrid(){
 
 	//Clear the vectors from the previous turn
 	balls_to_be_added.clear();
-	balls_to_be_removed.clear();
-	int num_balls = _num_rows * _num_cols;
-    int num_balls_to_be_added = chosen_path.size();
-	int chosen_col_idx = (chosen_path[0] - 1) % _num_cols;
-	
-	//Remove chosen balls
-	for (int row_idx = 0; row_idx < chosen_path.size(); row_idx++){
-		removeBall(row_idx, chosen_col_idx);
+	removed_balls.clear();
+	std::vector<int> balls_to_be_removed = chosen_path;
+	balls_to_be_removed.insert(balls_to_be_removed.end(), burst_balls.begin(), burst_balls.end());
+	std::sort(balls_to_be_removed.begin(), balls_to_be_removed.end());
+
+
+	for (int ball_id : balls_to_be_removed){
+		int row_idx = (ball_id - 1) / _num_cols;
+		int col_idx = (ball_id - 1) % _num_cols;
+		removeBall(row_idx, col_idx);
 	}
 
-	//Move balls in the chosen column down
-	moveBallsDown(num_balls_to_be_added, chosen_col_idx, chosen_path.size());
-	
-	//Add new balls in the chosen column
-	for (int new_row_idx = _num_rows - num_balls_to_be_added; new_row_idx < _num_rows; new_row_idx++){
-		BallSprite* new_ball = BallSprite::generateRandomSprite();
-		BallSprite* old_ball = ball_sprites[new_row_idx][chosen_col_idx];
-        new_ball->id = new_row_idx * _num_cols + chosen_col_idx + 1;
-		new_ball->setPosition(old_ball->getPosition());
-		new_ball->setScale(0.0f);
-		ball_sprites[new_row_idx][chosen_col_idx] = new_ball;
-		balls_to_be_added.push_back(new_ball);
-		auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
-		auto scale_action = cocos2d::ScaleTo::create(SCALE_DURATION, 1.0f);
-		auto appear_seq = cocos2d::Sequence::create(delay_action, scale_action, nullptr);
-		new_ball->runAction(appear_seq);
+
+	std::vector<std::deque<int>> remove_balls;
+	for (int i = 0; i < _num_cols; i++){
+		std::deque<int> cols = {};
+		remove_balls.push_back(cols);
 	}
 
-	// For each burst ball; remove the ball and move all balls above it down and
-	// add a new ball to the top most row
-	for (int burst_ball_id : burst_balls ){
-		//Calculate the row and col index based on the id
-		int burst_ball_col_idx = (burst_ball_id - 1) % _num_cols;
-		int burst_ball_row_idx = (burst_ball_id - 1) / _num_cols;
-		
-		//fade the ball
-		removeBall(burst_ball_row_idx, burst_ball_col_idx);
-		//Move balls down
-		moveBallsDown(burst_ball_row_idx + 1, burst_ball_col_idx, 1);
-		
-		// New ball needs to be added to the top most row so get its position 
-		// from the neigbors since the top ball in this column was moved down 
-		// in the previous step
-		auto new_x = ball_sprites[0][burst_ball_col_idx]->getPositionX();
-		auto new_y = ball_sprites[_num_rows - 1][0]->getPositionY();
-		BallSprite* new_ball = BallSprite::generateRandomSprite();
-		int new_row_idx = _num_rows - 1; //Add to last row
-		new_ball->id = new_row_idx * _num_cols + burst_ball_col_idx + 1;
-		new_ball->setPosition(cocos2d::Vec2(new_x, new_y));
-		new_ball->setScale(0.0f);
-		ball_sprites[new_row_idx][burst_ball_col_idx] = new_ball;
-		balls_to_be_added.push_back(new_ball);
-		auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
-		auto scale_action = cocos2d::ScaleTo::create(SCALE_DURATION, 1.0f);
-		auto appear_seq = cocos2d::Sequence::create(delay_action, scale_action, nullptr);
-		new_ball->runAction(appear_seq);
-
+	for (int ball_id : balls_to_be_removed){
+		int col_idx = (ball_id - 1) % _num_cols;
+		remove_balls[col_idx].push_back(ball_id);
 	}
 
+	for (int col_idx = 0; col_idx < _num_cols; col_idx++){
+		std::deque<int> col_balls_remove = remove_balls[col_idx];
+		std::deque<int> movable_balls;
+		if (col_balls_remove.size() != 0){
+			//find which balls can be moved in the current column
+			int start_row_idx = (col_balls_remove[0] - 1) / _num_cols;
+			for (int row_idx = start_row_idx; row_idx < _num_rows; row_idx++){
+				int ball_id = row_idx * _num_cols + col_idx + 1;
+				if (std::find(col_balls_remove.begin(), col_balls_remove.end(),ball_id) == col_balls_remove.end()){
+					movable_balls.push_back(ball_id);
+				}
+			}
+			
+			// Move the movable balls to their final positons
+			for (int movable_ball_id : movable_balls){
+				int swap_from_row_idx =  (movable_ball_id - 1) / _num_cols;
+				int swap_to_row_idx = (col_balls_remove[0] - 1) / _num_cols;
+				auto move_to_x = _grid_origin.x + (col_idx * _grid_step_x);
+				auto move_to_y = _grid_origin.y + (swap_to_row_idx * _grid_step_y);
+				BallSprite* moving_ball = ball_sprites[swap_from_row_idx][col_idx];
+				auto move_action = cocos2d::MoveTo::create(MOVE_DURATION, cocos2d::Vec2(move_to_x, move_to_y));
+				auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
+				auto seq = cocos2d::Sequence::create(delay_action, move_action, nullptr);
+				moving_ball->runAction(seq);
+				moving_ball->id = swap_to_row_idx * _num_cols + col_idx + 1;
+				ball_sprites[swap_to_row_idx][col_idx] = moving_ball;
+				col_balls_remove.pop_front();
+				col_balls_remove.push_back(movable_ball_id);
+				std::sort(col_balls_remove.begin(), col_balls_remove.end());
+				movable_balls.pop_front();
+			}
+
+			// Only case that remains is that there are still some balls which need to be removed. But the previous step 
+			// ensures that they will all be at the top of the column
+			int num_balls_to_be_added = col_balls_remove.size();
+			for (int row_idx = _num_rows - num_balls_to_be_added; row_idx < _num_rows; row_idx++){
+				addBall(row_idx, col_idx);
+			}
+		}
+	}
+	saveState();
+
+}
+
+
+//Saves the current state of the grid (classes of all balls) to a plist file.
+void BallGrid::saveState(){
+	std::string writable_path = cocos2d::FileUtils::getInstance()->getWritablePath();
+	std::string full_path = writable_path + "save.plist";
+	cocos2d::ValueVector ball_classes;
+	for (int row_idx = 0; row_idx < _num_rows; row_idx++){
+		for (int col_idx = 0; col_idx < _num_cols; col_idx++){\
+			int ball_color = static_cast<int> (ball_sprites[row_idx][col_idx]->color);
+			ball_classes.push_back(cocos2d::Value(ball_color));
+		}
+	}
+	cocos2d::FileUtils::getInstance()->writeValueVectorToFile(ball_classes, full_path.c_str());
+	cocos2d::UserDefault::getInstance()->setBoolForKey("save_exists", true);
+}
+
+
+// Retrieve the current state from a saved file. 
+// @returns vector containing classes of the balls in the grid
+std::vector<int> BallGrid::getCurrentState(){
+    std::string writable_path = cocos2d::FileUtils::getInstance()->getWritablePath();
+	std::string full_path = writable_path + "save.plist";
+	cocos2d::ValueVector class_values = cocos2d::FileUtils::getInstance()->getValueVectorFromFile(full_path.c_str());
+	std::vector<int> ball_classes;
+	for (int i = 0 ; i < class_values.size(); i++){
+		ball_classes.push_back(class_values[i].asInt());
+	}
+
+    return ball_classes;
 }

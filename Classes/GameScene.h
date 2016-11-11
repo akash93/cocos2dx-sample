@@ -26,7 +26,7 @@ public:
 
 	int _player_score;
 	CREATE_FUNC(Game);
-
+	void initGrid(bool is_resumed);
 	virtual bool onTouchBegan(Touch* touch, Event* events) override;
 	virtual void onTouchMoved(Touch* touch, Event* events) override;
 	virtual void onTouchEnded(Touch* touch, Event* events) override;

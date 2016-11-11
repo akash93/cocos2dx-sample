@@ -23,7 +23,17 @@ bool HomeScreen::init(){
 	}
 	
 	_screen_size = Director::getInstance()->getVisibleSize();
-	
+
+	initMenu();
+	return true;
+}
+
+void HomeScreen::initMenu(){
+
+	bool save_exists = UserDefault::getInstance()->getBoolForKey("save_exists");
+
+	Menu *menu;
+
 	auto start_label = Label::createWithTTF("Start Game", "fonts/Marker Felt.ttf",92);
 	auto score_label = Label::createWithTTF("High Scores", "fonts/Marker Felt.ttf",92);
 	auto quit_label = Label::createWithTTF("Quit","fonts/Marker Felt.ttf", 92);
@@ -31,19 +41,36 @@ bool HomeScreen::init(){
 	high_scores = MenuItemLabel::create(score_label, CC_CALLBACK_1(HomeScreen::scoreCallback, this));
 	quit_game = MenuItemLabel::create(quit_label, CC_CALLBACK_1(HomeScreen::gameQuitCallback, this));
 	
-	start_game->setPosition(Point(_screen_size.width / 2, (_screen_size.height / 4) * 3));
-	high_scores->setPosition(Point(_screen_size.width / 2, (_screen_size.height / 4) * 2));
-	quit_game->setPosition(Point(_screen_size.width / 2, (_screen_size.height / 4) * 1));
+	if (save_exists){
+		auto resume_label = Label::createWithTTF("Resume game", "fonts/Marker Felt.ttf", 92);
+		resume_game = MenuItemLabel::create(resume_label, CC_CALLBACK_1(HomeScreen::resumeGameCallback, this));
+		resume_game->setPosition(Point(_screen_size.width / 2, (_screen_size.height / 5) * 4));
+		start_game->setPosition(Point(_screen_size.width / 2, (_screen_size.height / 5) * 3));
+		high_scores->setPosition(Point(_screen_size.width / 2, (_screen_size.height / 5) * 2));
+		quit_game->setPosition(Point(_screen_size.width / 2, (_screen_size.height / 5) * 1));
 
-	auto *menu = Menu::create(start_game, high_scores, quit_game, NULL);
+		menu = Menu::create(resume_game, start_game, high_scores, quit_game, NULL);
+	}
+	else{
+		start_game->setPosition(Point(_screen_size.width / 2, (_screen_size.height / 4) * 3));
+		high_scores->setPosition(Point(_screen_size.width / 2, (_screen_size.height / 4) * 2));
+		quit_game->setPosition(Point(_screen_size.width / 2, (_screen_size.height / 4) * 1));
+
+		menu = Menu::create(start_game, high_scores, quit_game, NULL);
+	}
+
 	menu->setPosition(Point(0,0));
 	
 	this->addChild(menu);
 
-	return true;
 }
 
 void HomeScreen::startGameCallback(Ref* sender){
+	Director::getInstance()->replaceScene(TransitionFade::create(1, Game::createScene()));
+}
+
+void HomeScreen::resumeGameCallback(Ref* sender){
+	UserDefault::getInstance()->setBoolForKey("is_resumed", true);
 	Director::getInstance()->replaceScene(TransitionFade::create(1, Game::createScene()));
 }
 
