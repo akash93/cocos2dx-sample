@@ -66,7 +66,7 @@ void BallGrid::setPath(int chosen_idx){
 		chosen_path.push_back(ball_sprites[i][chosen_idx - 1]->id);
 		i++;
 	}
-    
+
     getChosenPath(chosen_idx, chosen_color);
 	
 	// For each ball in chosen path check if neighbors are same color and add them to
@@ -147,6 +147,83 @@ void BallGrid::getChosenPath(int chosen_idx, Color chosen_color){
 		}
 		path_length -= 1;
 	}
+	
+	// Find the burst balls corresponding the longest path
+	std::vector<int> longest_path_burst_balls;
+	for (int ball_id : longest_path_ids){
+		int row_idx = (ball_id - 1) / _num_cols;
+		int col_idx = (ball_id - 1) % _num_cols;
+		
+		//Check left
+		if (col_idx != 0 && ball_sprites[row_idx][col_idx - 1]->color == chosen_color){
+			int burst_ball_id = row_idx * _num_cols + col_idx;
+			longest_path_burst_balls.push_back(burst_ball_id);
+		}
+
+		if (col_idx != _num_cols - 1 && ball_sprites[row_idx][col_idx + 1]->color == chosen_color){
+			int burst_ball_id = row_idx * _num_cols + col_idx + 2;
+			longest_path_burst_balls.push_back(burst_ball_id);
+		}
+	}
+
+	std::vector<int> balls_to_be_removed = longest_path_ids;
+	balls_to_be_removed.insert(balls_to_be_removed.end(), longest_path_burst_balls.begin(), longest_path_burst_balls.end());
+	std::sort(balls_to_be_removed.begin(), balls_to_be_removed.end());
+	std::vector<std::vector<int>> remove_balls;
+	for (int i = 0; i < _num_cols; i++){
+		std::vector<int> cols = {};
+		remove_balls.push_back(cols);
+	}
+
+	for (int ball_id : balls_to_be_removed){
+		int col_idx = (ball_id - 1) % _num_cols;
+		remove_balls[col_idx].push_back(ball_id);
+	}
+
+	for (int col_idx = 0; col_idx < _num_cols; col_idx++){
+		std::vector<int> col_balls_remove = remove_balls[col_idx];
+		std::deque<int> movable_balls;
+		if (col_balls_remove.size() != 0){
+			//find which balls can be moved in the current column
+			int start_row_idx = (col_balls_remove[0] - 1) / _num_cols;
+			for (int row_idx = start_row_idx; row_idx < _num_rows; row_idx++){
+				int ball_id = row_idx * _num_cols + col_idx + 1;
+				if (std::find(col_balls_remove.begin(), col_balls_remove.end(),ball_id) == col_balls_remove.end()){
+					movable_balls.push_back(ball_id);
+				}
+			}
+			
+			// Move the movable balls to their final positons
+			for (int movable_ball_id : movable_balls){
+				int swap_from_row_idx =  (movable_ball_id) / _num_cols;
+				int swap_to_row_idx = (col_balls_remove[0] - 1) / _num_rows;
+				auto move_to_x = _grid_origin.x + (col_idx * _grid_step_x);
+				auto move_to_y = _grid_origin.y + (swap_to_row_idx * _grid_step_y);
+				removeBall(swap_to_row_idx, col_idx);
+				BallSprite* moving_ball = ball_sprites[swap_from_row_idx][col_idx];
+				auto move_action = cocos2d::MoveTo::create(MOVE_DURATION, cocos2d::Vec2(move_to_x, move_to_y));
+				auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
+				auto seq = cocos2d::Sequence::create(delay_action, move_action, nullptr);
+				moving_ball->runAction(seq);
+				moving_ball->id = swap_to_row_idx * _num_cols + col_idx + 1;
+				ball_sprites[swap_to_row_idx][col_idx] = moving_ball;
+				col_balls_remove.push_back(movable_ball_id);
+				std::sort(col_balls_remove.begin(), col_balls_remove.end());
+				movable_balls.erase(movable_balls.begin());
+			}
+
+			// Only case that remains is that there are still some balls which need to be removed. But the previous step 
+			// ensures that they will all be at the top of the column
+			int num_balls_to_be_added = col_balls_remove.size();
+			for (int row_idx = _num_rows - num_balls_to_be_added; row_idx < _num_rows; row_idx++){
+				removeBall(row_idx, col_idx);
+				addBall(row_idx, col_idx);
+			}
+		}
+	}
+
+
+
 }
 
 // Higlight the chosen path and burst balls for a given choice
