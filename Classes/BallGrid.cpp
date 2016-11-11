@@ -61,15 +61,20 @@ void BallGrid::setPath(int chosen_idx){
 
 }
 
+
+// Generate the list of chosen and burst balls
+// @param chosen_idx : The id of the chosen ball
+// @param chosem_color : The color of the chosen ball
 void BallGrid::getChosenPath(int chosen_idx, Color chosen_color){
 	
 	std::vector<std::vector<int>> longest_lengths;
 
 	//Initialize length matrix
-	for(int i = 0; i < _num_rows; i++){
+	for (int i = 0; i < _num_rows; i++){
 		std::vector<int> rows;
 		for (int j = 0; j < _num_cols; j++){
-			if(ball_sprites[i][j]->color == chosen_color){
+			// we are only going to work with balls of the chosen color so set the others to invalid (-1) values
+			if (ball_sprites[i][j]->color == chosen_color){
 				rows.push_back(1);
 			}
 			else{
@@ -79,9 +84,12 @@ void BallGrid::getChosenPath(int chosen_idx, Color chosen_color){
 		longest_lengths.push_back(rows);
 	}
 
-	for(int row_idx = _num_rows - 1; row_idx >= 0; row_idx--){
-		for(int col_idx = 0; col_idx < _num_cols; col_idx++){
-			if(ball_sprites[row_idx][col_idx]->color == chosen_color){
+	// For each ball check the top and top right neighbor
+	// If they are of the same color then we can add the longest path length
+	// for that ball to the current ball
+	for (int row_idx = _num_rows - 1; row_idx >= 0; row_idx--){
+		for (int col_idx = 0; col_idx < _num_cols; col_idx++){
+			if (ball_sprites[row_idx][col_idx]->color == chosen_color){
 				int a  = 0, b = 0;
 				if (row_idx + 1 < _num_rows && ball_sprites[row_idx + 1][col_idx]->color == chosen_color){
 					a = longest_lengths[row_idx + 1][col_idx];
@@ -94,6 +102,8 @@ void BallGrid::getChosenPath(int chosen_idx, Color chosen_color){
 		}
 	}
 
+	// Use the longest path length matrix to calculate the longest 
+	// path from the chosen index
 	chosen_path.push_back(chosen_idx);
 	int path_length = longest_lengths[0][chosen_idx - 1];
 	int curr_col = chosen_idx - 1;
@@ -121,6 +131,7 @@ void BallGrid::getChosenPath(int chosen_idx, Color chosen_color){
 			burst_balls.push_back(burst_ball_id);
 		}
 
+		//Check right
 		if (col_idx != _num_cols - 1 && ball_sprites[row_idx][col_idx + 1]->color == chosen_color){
 			int burst_ball_id = row_idx * _num_cols + col_idx + 2;
 			burst_balls.push_back(burst_ball_id);
@@ -168,31 +179,15 @@ int BallGrid::getScore(Color player_class, Color enemy_class, int base_attack, i
 	return score;
 }
 
-// Move a set of balls in the same column down
-// @param start_row_idx: Row index of the first ball which needs to go down
-// @param col_idx: Column index of the balls
-// @param step_size: The number of spaces the balls have to shift by
-void BallGrid::moveBallsDown(int start_row_idx, int col_idx, int step_size){
-	for (int swap_from_row_idx = start_row_idx; swap_from_row_idx < _num_rows; swap_from_row_idx++){
-		int swap_to_row_idx = swap_from_row_idx - step_size;
-		BallSprite* swap_from = ball_sprites[swap_from_row_idx][col_idx];
-		auto swap_to_x = _grid_origin.x + col_idx * _grid_step_x;
-		auto swap_to_y = _grid_origin.y + swap_to_row_idx * _grid_step_y;
-		auto move_action = cocos2d::MoveTo::create(MOVE_DURATION, cocos2d::Vec2(swap_to_x, swap_to_y));
-		auto delay_action = cocos2d::DelayTime::create(DELAY_DURATION);
-		auto move_seq = cocos2d::Sequence::create(delay_action, move_action,nullptr);
-		swap_from->runAction(move_seq);
-		swap_from->id = swap_to_row_idx * _num_cols + col_idx + 1;
-		ball_sprites[swap_to_row_idx][col_idx] = swap_from;
-	}
-}
-
+// Add a ball at the given location on the grid
+// @param row_idx, @param col_idx define the location where the 
+// ball needs to be added
 void BallGrid::addBall(int row_idx, int col_idx){
 	BallSprite* new_ball = BallSprite::generateRandomSprite();
-	auto old_x = _grid_origin.x + col_idx * _grid_step_x;
-	auto old_y = _grid_origin.y + row_idx * _grid_step_y;
+	auto new_x = _grid_origin.x + col_idx * _grid_step_x;
+	auto new_y = _grid_origin.y + row_idx * _grid_step_y;
 	new_ball->id = row_idx * _num_cols + col_idx + 1;
-	new_ball->setPosition(cocos2d::Vec2(old_x, old_y));
+	new_ball->setPosition(cocos2d::Vec2(new_x, new_y));
 	new_ball->setScale(0.0f);
 	ball_sprites[row_idx][col_idx] = new_ball;
 	balls_to_be_added.push_back(new_ball);
@@ -220,10 +215,12 @@ void BallGrid::generateNewGrid(){
 	//Clear the vectors from the previous turn
 	balls_to_be_added.clear();
 	removed_balls.clear();
+
+	//All chosen and burst balls need to be removed.
 	std::vector<int> balls_to_be_removed = chosen_path;
 	balls_to_be_removed.insert(balls_to_be_removed.end(), burst_balls.begin(), burst_balls.end());
+	//Sort is called to ensure that the balls in the list are in geometric order
 	std::sort(balls_to_be_removed.begin(), balls_to_be_removed.end());
-
 
 	for (int ball_id : balls_to_be_removed){
 		int row_idx = (ball_id - 1) / _num_cols;
@@ -231,18 +228,19 @@ void BallGrid::generateNewGrid(){
 		removeBall(row_idx, col_idx);
 	}
 
-
+	// Create a 2d vector/deque for the removed balls by separating them column wise.
+	// Each row is a deque so that first element can be removed easily.
 	std::vector<std::deque<int>> remove_balls;
 	for (int i = 0; i < _num_cols; i++){
 		std::deque<int> cols = {};
 		remove_balls.push_back(cols);
 	}
-
 	for (int ball_id : balls_to_be_removed){
 		int col_idx = (ball_id - 1) % _num_cols;
 		remove_balls[col_idx].push_back(ball_id);
 	}
 
+	// For each column move the column balls to the position of the balls being removed
 	for (int col_idx = 0; col_idx < _num_cols; col_idx++){
 		std::deque<int> col_balls_remove = remove_balls[col_idx];
 		std::deque<int> movable_balls;
@@ -275,7 +273,7 @@ void BallGrid::generateNewGrid(){
 				movable_balls.pop_front();
 			}
 
-			// Only case that remains is that there are still some balls which need to be removed. But the previous step 
+			// Only case that remains is that there are still some empty spaces left on the grid but above process
 			// ensures that they will all be at the top of the column
 			int num_balls_to_be_added = col_balls_remove.size();
 			for (int row_idx = _num_rows - num_balls_to_be_added; row_idx < _num_rows; row_idx++){
@@ -283,6 +281,7 @@ void BallGrid::generateNewGrid(){
 			}
 		}
 	}
+	// Save the progess
 	saveState();
 
 }

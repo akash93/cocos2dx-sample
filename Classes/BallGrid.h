@@ -10,12 +10,12 @@ class BallGrid{
 	public:
 		BallGrid();
 		virtual ~BallGrid();
-		std::vector<std::vector<BallSprite*>> ball_sprites;
-		void generateGrid(int num_cols, int num_rows);
+		std::vector<std::vector<BallSprite*>> ball_sprites; // Contains the sprites making up the grid
+		void generateGrid(int num_cols, int num_rows); 
 		void resumeGrid(int num_cols, int num_rows);
-		int _num_cols;
-		int _num_rows;
-		int _chosen_idx;
+		int _num_cols; // Number of columns in the grid
+		int _num_rows; // Number of rows in the grid
+		int _chosen_idx; // Id of the chosen ball. Member variable so that it can be 
 		float _grid_height;
 		float _grid_width;
 		float _grid_step_x;

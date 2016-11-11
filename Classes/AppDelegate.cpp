@@ -3,19 +3,15 @@
 
 USING_NS_CC;
 
-AppDelegate::AppDelegate() {
-	
-}
+AppDelegate::AppDelegate() {}
 
-AppDelegate::~AppDelegate()
-{
-}
+AppDelegate::~AppDelegate(){}
 
 bool AppDelegate::applicationDidFinishLaunching() {
 	auto director = Director::getInstance();
 	auto glview = director->getOpenGLView();
 	if (!glview) {
-		glview = GLViewImpl::create("Hello World");
+		glview = GLViewImpl::create("Test Game");
 		auto screen_size = glview->getFrameSize();
 		auto design_size = Size(768,1024);
 		glview->setDesignResolutionSize(design_size.width,design_size.height, ResolutionPolicy::EXACT_FIT);
@@ -32,9 +28,11 @@ bool AppDelegate::applicationDidFinishLaunching() {
 }
 
 void AppDelegate::applicationDidEnterBackground() {
+	Director::getInstance()->stopAnimation();
 }
 
 void AppDelegate::applicationWillEnterForeground() {
+	Director::getInstance()->startAnimation();
 }
 
 void AppDelegate::initGLContextAttrs(){
