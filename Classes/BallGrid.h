@@ -13,7 +13,7 @@ class BallGrid{
 		std::vector<std::vector<BallSprite*>> ball_sprites; // Contains the sprites making up the grid
 		int _num_cols; // Number of columns in the grid
 		int _num_rows; // Number of rows in the grid
-		int _chosen_idx; // Id of the chosen ball. Member variable so that it can be 
+		int _chosen_id; // Id of the chosen ball. 
 		float _grid_height; // Height of the grid
 		float _grid_width; // Width of the grid
 		float _grid_step_x; // The x distance between two consecutive balls of the same row
@@ -25,11 +25,9 @@ class BallGrid{
 		bool isFirstRowSelected(Touch* touch);
 		void generateGrid(int num_cols, int num_rows); 
 		void resumeGrid(int num_cols, int num_rows);
-		void setPath(int chosen_idx);
-		void getChosenPath(int chosen_idx, Color chosen_color);
+		void setChosenPath();
+		void setBurstBalls();
 		void highlightPath();
-		int getScore(Color player_class, Color enemy_class, int base_attack, int base_burst_damage);
-		void moveBallsDown(int start_row_idx, int col_idx, int step_size);
 		void addBall(int row_idx, int col_idx);
 		void removeBall(int row_idx, int col_idx);
 		void generateNewGrid();

@@ -6,4 +6,3 @@ This is a small sample game built using the Cocos2D-X framework.
  - Run it on the appropriate device/emulator
 
 
-Further details to be posted later..

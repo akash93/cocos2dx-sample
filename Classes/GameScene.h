@@ -1,7 +1,6 @@
 #pragma once
 
 #include "cocos2d.h"
-#include "PlayerSprite.h"
 #include "BallGrid.h"
 
 
@@ -14,18 +13,11 @@ public:
 	virtual ~Game();
 	static Scene* createScene();
 	virtual bool init() override;
-	PlayerSprite* _player1;
-	PlayerSprite* _player2;
 	BallGrid* ball_grid;
-
-	Label* _player_score_label;
 	Size _screen_size;
-
-	int _player_score;
 	CREATE_FUNC(Game);
 	void initGrid(bool is_resumed);
 	virtual bool onTouchBegan(Touch* touch, Event* events) override;
-	virtual void onTouchMoved(Touch* touch, Event* events) override;
 	virtual void onTouchEnded(Touch* touch, Event* events) override;
 	
 };
