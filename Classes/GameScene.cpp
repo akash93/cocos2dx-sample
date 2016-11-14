@@ -106,8 +106,7 @@ bool Game::onTouchBegan(Touch* touch, Event* event){
 	return false;
 }
 
-void Game::onTouchMoved(Touch* touch, Event* event){
-}
+void Game::onTouchMoved(Touch* touch, Event* event){}
 
 void Game::onTouchEnded(Touch* touch, Event* event){
 	
@@ -123,6 +122,14 @@ void Game::onTouchEnded(Touch* touch, Event* event){
 		}
 		
 		//reset opacity
+		for ( auto ball_row : ball_grid->ball_sprites ){
+			for (auto ball : ball_row){
+				ball->setOpacity(255);
+			}
+		}
+	}
+	else{
+		//Reset opacity
 		for ( auto ball_row : ball_grid->ball_sprites ){
 			for (auto ball : ball_row){
 				ball->setOpacity(255);
