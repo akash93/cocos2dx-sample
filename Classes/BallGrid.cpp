@@ -32,7 +32,7 @@ bool BallGrid::isFirstRowSelected(Touch* touch){
 		auto tap = touch->getLocation();
 		for(int col_idx = 0; col_idx < _num_cols; col_idx++){
 			if(ball_sprites[0][col_idx]->getBoundingBox().containsPoint(tap)){
-				_chosen_idx = col_idx + 1;
+				_chosen_id = col_idx + 1;
 				return true;
 			}
 		}
@@ -69,14 +69,13 @@ void BallGrid::resumeGrid(int num_cols, int num_rows){
 
 // Generate the list of chosen balls
 // @param chosen_idx : The id of the chosen ball
-void BallGrid::setChosenPath(int chosen_idx){
+void BallGrid::setChosenPath(){
 	
-	//Clear the chosen and burst ball vectors from the previous state
+	//Clear the chosen path vectors from the previous state
 	chosen_path.clear();
-	burst_balls.clear();
 	// Get the color of the chosen ball and find the longest path with the given color
 	// and add it to chosen path
-	Color chosen_color = ball_sprites[0][chosen_idx - 1]->color;
+	Color chosen_color = ball_sprites[0][_chosen_id - 1]->color;
 
 	std::vector<std::vector<int>> longest_lengths;
 
@@ -115,9 +114,9 @@ void BallGrid::setChosenPath(int chosen_idx){
 
 	// Use the longest path length matrix to calculate the longest 
 	// path from the chosen index
-	chosen_path.push_back(chosen_idx);
-	int path_length = longest_lengths[0][chosen_idx - 1];
-	int curr_col = chosen_idx - 1;
+	chosen_path.push_back(_chosen_id);
+	int path_length = longest_lengths[0][_chosen_id - 1];
+	int curr_col = _chosen_id - 1;
 	for (int i = 0; i < _num_rows - 1 && path_length > 0; i++){
 		if (longest_lengths[i + 1][curr_col] == path_length - 1){
 			int ball_id = (i + 1) * _num_cols + curr_col + 1;
@@ -136,9 +135,11 @@ void BallGrid::setChosenPath(int chosen_idx){
 // Sets the burst balls based on the chosen path by checking the neighbors
 // of the colored balls
 // @param chosen_idx : Chosen ball id
-void BallGrid::setBurstBalls(int chosen_idx){
+void BallGrid::setBurstBalls(){
+	
+	burst_balls.clear();
 
-	Color chosen_color = ball_sprites[0][chosen_idx - 1]->color;
+	Color chosen_color = ball_sprites[0][_chosen_id - 1]->color;
 	// Find the burst balls corresponding the longest path
 	for (int ball_id : chosen_path){
 		int row_idx = (ball_id - 1) / _num_cols;

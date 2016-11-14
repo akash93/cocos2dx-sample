@@ -93,8 +93,8 @@ void Game::initGrid(bool is_resumed){
 bool Game::onTouchBegan(Touch* touch, Event* event){
 	//Check if touch was valid
 	if(ball_grid->isFirstRowSelected(touch)){
-		ball_grid->setChosenPath(ball_grid->_chosen_idx);
-		ball_grid->setBurstBalls(ball_grid->_chosen_idx);
+		ball_grid->setChosenPath();
+		ball_grid->setBurstBalls();
 		ball_grid->highlightPath();
 		return true;
 	}
