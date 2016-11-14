@@ -67,26 +67,17 @@ void BallGrid::resumeGrid(int num_cols, int num_rows){
 	}
 }
 
-// Fill up the chosen path and burst ball vectors based on the chosen column
-// @param chosen_idx: The id of the chosen element
-// Since id starts from 1 the col index for current element will be chosen_id - 1
-void BallGrid::setPath(int chosen_idx){
+// Generate the list of chosen balls
+// @param chosen_idx : The id of the chosen ball
+void BallGrid::setChosenPath(int chosen_idx){
+	
 	//Clear the chosen and burst ball vectors from the previous state
 	chosen_path.clear();
 	burst_balls.clear();
-		// Get the color of the chosen ball and find the longest path with the given color
+	// Get the color of the chosen ball and find the longest path with the given color
 	// and add it to chosen path
 	Color chosen_color = ball_sprites[0][chosen_idx - 1]->color;
-	getChosenPath(chosen_idx, chosen_color);
 
-}
-
-
-// Generate the list of chosen and burst balls
-// @param chosen_idx : The id of the chosen ball
-// @param chosem_color : The color of the chosen ball
-void BallGrid::getChosenPath(int chosen_idx, Color chosen_color){
-	
 	std::vector<std::vector<int>> longest_lengths;
 
 	//Initialize length matrix
@@ -140,6 +131,14 @@ void BallGrid::getChosenPath(int chosen_idx, Color chosen_color){
 		path_length -= 1;
 	}
 	
+}
+
+// Sets the burst balls based on the chosen path by checking the neighbors
+// of the colored balls
+// @param chosen_idx : Chosen ball id
+void BallGrid::setBurstBalls(int chosen_idx){
+
+	Color chosen_color = ball_sprites[0][chosen_idx - 1]->color;
 	// Find the burst balls corresponding the longest path
 	for (int ball_id : chosen_path){
 		int row_idx = (ball_id - 1) / _num_cols;
@@ -157,6 +156,7 @@ void BallGrid::getChosenPath(int chosen_idx, Color chosen_color){
 			burst_balls.push_back(burst_ball_id);
 		}
 	}
+
 
 }
 
@@ -176,27 +176,6 @@ void BallGrid::highlightPath(){
 		}
 	}
 
-}
-
-// Calculate the score based on the player and enemy stats
-// @param player_class, @param enemy_class decide the damage multipliers
-// @param base_attack: Damage for each ball in the chosen path
-// @param base_burst_damage: Damage for each ball in burst balls
-// @return : The score of the current move based on above params
-int BallGrid::getScore(Color player_class, Color enemy_class, int base_attack, int base_burst_damage){
-	// TODO add real class based damage like in DBZ game
-	int damage_multiplier = 1;
-	Color chosen_color = ball_sprites[0][chosen_path[0] - 1]->color;
-	if (chosen_color == player_class){
-		damage_multiplier *= 2;
-	}
-	if (chosen_color == enemy_class){
-		damage_multiplier /= 2;
-	}
-
-	int score = (base_attack * chosen_path.size() + base_burst_damage * burst_balls.size()) * damage_multiplier;
-
-	return score;
 }
 
 // Add a ball at the given location on the grid

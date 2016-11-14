@@ -31,6 +31,8 @@ BallSprite* BallSprite::generateRandomSprite(){
 }
 
 // Setup the flashing animation for the ball using 2 sprite images for each ball
+// @param format: String specifying the file naming format
+// @return : Vector containing SpriteFrames for the sprite animation
 Vector<SpriteFrame*> BallSprite::setupAnimation(const char* format){
 	auto sprite_cache = SpriteFrameCache::getInstance();
 	Vector<SpriteFrame*> frames;

@@ -15,7 +15,6 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
                    ../../../Classes/AppDelegate.cpp \
                    ../../../Classes/HomeScene.cpp \
                    ../../../Classes/GameScene.cpp \
-                   ../../../Classes/PlayerSprite.cpp \
                    ../../../Classes/BallSprite.cpp \
                    ../../../Classes/BallGrid.cpp
 

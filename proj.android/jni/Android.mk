@@ -12,10 +12,11 @@ LOCAL_MODULE := MyGame_shared
 LOCAL_MODULE_FILENAME := libMyGame
 
 LOCAL_SRC_FILES := hellocpp/main.cpp \
-                   ../../Classes/AppDelegate.cpp \
-                   ../../Classes/GameScene.cpp \
-                   ../../Classes/PlayerSprite.cpp \
-                   ../../Classes/BallSprite.cpp
+                   ../../../Classes/AppDelegate.cpp \
+                   ../../../Classes/HomeScene.cpp \
+                   ../../../Classes/GameScene.cpp \
+                   ../../../Classes/BallSprite.cpp \
+                   ../../../Classes/BallGrid.cpp
 
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes
