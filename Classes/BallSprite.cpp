@@ -7,11 +7,12 @@ BallSprite::~BallSprite(void){}
 const std::string BallSprite::sprite_paths[] = {"blue_ball", "green_ball", "purple_ball", "orange_ball", "red_ball"};
 
 // Generate a sprite object from a given file. Looks in the Resources folder by default
+// @param filename : defines which image file needs to be used for creating the sprite
 BallSprite* BallSprite::gameSpriteWithFile(std::string filename){
 	auto sprite = new BallSprite();
 	std::string format_string = filename + "_%03d.png";
 	Vector<SpriteFrame*> frames = setupAnimation(format_string.c_str());
-	auto animation = Animation::createWithSpriteFrames(frames, 1.0f/4);
+	auto animation = Animation::createWithSpriteFrames(frames, 1.0f/4); // 4 frames per second
 	if (sprite && sprite->initWithSpriteFrame(frames.front())){
 		sprite->autorelease();
 		sprite->runAction(RepeatForever::create(Animate::create(animation)));
@@ -29,6 +30,7 @@ BallSprite* BallSprite::generateRandomSprite(){
 	return ball;
 }
 
+// Setup the flashing animation for the ball using 2 sprite images for each ball
 Vector<SpriteFrame*> BallSprite::setupAnimation(const char* format){
 	auto sprite_cache = SpriteFrameCache::getInstance();
 	Vector<SpriteFrame*> frames;
@@ -42,6 +44,7 @@ Vector<SpriteFrame*> BallSprite::setupAnimation(const char* format){
 }
 
 // Calculates the radius to help calculate the positioning of the sprite
+// @return the 'radius' of the sprite
 float BallSprite::radius(){
     // Scaling has been modified for current sprite sizes.
 	return getTexture()->getContentSize().width * 0.005f;

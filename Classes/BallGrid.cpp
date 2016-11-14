@@ -24,6 +24,26 @@ void BallGrid::generateGrid(int num_cols, int num_rows){
 
 }
 
+// Checks if the first row of the grid was touched
+// @param touch : Contains information about the touch event
+// @return true if the first row was touched and false otherwise
+bool BallGrid::isFirstRowSelected(Touch* touch){
+	if(touch!=nullptr){
+		auto tap = touch->getLocation();
+		for(int col_idx = 0; col_idx < _num_cols; col_idx++){
+			if(ball_sprites[0][col_idx]->getBoundingBox().containsPoint(tap)){
+				_chosen_idx = col_idx + 1;
+				return true;
+			}
+		}
+		return false;
+	}
+	return false;
+}
+
+
+
+
 // Loads a previously saved configuration. 
 // @param num_rows: Number of rows in the grid
 // @param num_cols: Number of columns in the grid
@@ -214,7 +234,6 @@ void BallGrid::generateNewGrid(){
 
 	//Clear the vectors from the previous turn
 	balls_to_be_added.clear();
-	removed_balls.clear();
 
 	//All chosen and burst balls need to be removed.
 	std::vector<int> balls_to_be_removed = chosen_path;

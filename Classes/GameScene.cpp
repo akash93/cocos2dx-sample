@@ -95,32 +95,9 @@ void Game::initGrid(bool is_resumed){
 
 }
 
-// Check whether the first row of the grid is selected
-// @param touch : Defining the parameters where the user touched the screen
-// @return true if any ball in the first row of grid was touched, false otherwise
-bool Game::isFirstRowSelected(Touch* touch){
-	if(touch!=nullptr){
-		auto tap = touch->getLocation();
-		for(int col_idx = 0; col_idx < NUM_COLS; col_idx++){
-			if(ball_grid->ball_sprites[0][col_idx]->getBoundingBox().containsPoint(tap)){
-				ball_grid->_chosen_idx = col_idx + 1;
-				return true;
-			}
-		}
-		return false;
-	}
-	return false;
-}
-
-
-// Called when the user's finger lands on screen. 
-// @param touch, @param event contain all information regarding the action
-// @return true if the event is handled by the scene and false otherwise
-// Check if the user touched the first row and if yes calculate the 
-// path and highlight it
 bool Game::onTouchBegan(Touch* touch, Event* event){
 	//Check if touch was valid
-	if(isFirstRowSelected(touch)){
+	if(ball_grid->isFirstRowSelected(touch)){
 		ball_grid->setPath(ball_grid->_chosen_idx);
 		ball_grid->highlightPath();
 		return true;
@@ -129,21 +106,12 @@ bool Game::onTouchBegan(Touch* touch, Event* event){
 	return false;
 }
 
-// Called when the user's finger moves without leaving screen contact.
-// In practical situations this method is continously called since 
-// human fingers are not point contacts.
-// TODO Cancel the choice made in onTouchBegan
 void Game::onTouchMoved(Touch* touch, Event* event){
 }
 
-
-// Called when the user's fingers leaves contact from the screen.
-// @param touch, @param event contain all information regarding the action
-// Check if the user had touched the first row element and if yes then performs
-// all manipulations of adding and removing elements
 void Game::onTouchEnded(Touch* touch, Event* event){
 	
-	if (isFirstRowSelected(touch)){
+	if (ball_grid->isFirstRowSelected(touch)){
 
 		// Animate the balls and manipulate the grid
 		ball_grid->generateNewGrid();
@@ -162,5 +130,4 @@ void Game::onTouchEnded(Touch* touch, Event* event){
 		}
 	}
 }
-
 
