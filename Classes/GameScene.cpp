@@ -57,7 +57,6 @@ bool Game::init(){
 	_player_score_label->setTextColor(Color4B::WHITE);
 	this->addChild(_player_score_label, 1);
 	
-	this->scheduleUpdate();
 	
 	return true;
 }
@@ -96,23 +95,9 @@ void Game::initGrid(bool is_resumed){
 
 }
 
-bool Game::isFirstRowSelected(Touch* touch){
-	if(touch!=nullptr){
-		auto tap = touch->getLocation();
-		for(int col_idx = 0; col_idx < NUM_COLS; col_idx++){
-			if(ball_grid->ball_sprites[0][col_idx]->getBoundingBox().containsPoint(tap)){
-				ball_grid->_chosen_idx = col_idx + 1;
-				return true;
-			}
-		}
-		return false;
-	}
-	return false;
-}
-
 bool Game::onTouchBegan(Touch* touch, Event* event){
 	//Check if touch was valid
-	if(isFirstRowSelected(touch)){
+	if(ball_grid->isFirstRowSelected(touch)){
 		ball_grid->setPath(ball_grid->_chosen_idx);
 		ball_grid->highlightPath();
 		return true;
@@ -121,12 +106,11 @@ bool Game::onTouchBegan(Touch* touch, Event* event){
 	return false;
 }
 
-void Game::onTouchMoved(Touch* touch, Event* event){
-}
+void Game::onTouchMoved(Touch* touch, Event* event){}
 
 void Game::onTouchEnded(Touch* touch, Event* event){
 	
-	if (isFirstRowSelected(touch)){
+	if (ball_grid->isFirstRowSelected(touch)){
 
 		// Animate the balls and manipulate the grid
 		ball_grid->generateNewGrid();
@@ -144,10 +128,13 @@ void Game::onTouchEnded(Touch* touch, Event* event){
 			}
 		}
 	}
+	else{
+		//Reset opacity
+		for ( auto ball_row : ball_grid->ball_sprites ){
+			for (auto ball : ball_row){
+				ball->setOpacity(255);
+			}
+		}
+	}
 }
-
-void Game::update(float dt){
-
-}
-
 

@@ -3,8 +3,8 @@
 
 USING_NS_CC;
 
-#define NUM_CLASSES 5
-#define NUM_SPRITES_PER_CLASS 2
+#define NUM_CLASSES 5 // Number of classes for the player/ball
+#define NUM_SPRITES_PER_CLASS 2 // Number of sprite image files available for each class
 
 enum class Color{
 	BLUE,
@@ -22,9 +22,9 @@ class BallSprite : public Sprite{
 		static BallSprite* gameSpriteWithFile(std::string file_name);
 		static BallSprite* generateRandomSprite();
 		float radius();
-		Color color;
-		int id;
-		const static std::string sprite_paths[]; 
+		Color color; // Contains the class of the ball
+		int id; // Unique identifier for the sprite
+		const static std::string sprite_paths[];  // Contains the paths to the sprite image files
 		static Vector<SpriteFrame*> setupAnimation(const char* format);
 
 };
